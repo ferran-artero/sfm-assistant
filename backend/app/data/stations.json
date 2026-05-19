@@ -1,0 +1,657 @@
+[
+  {
+    "stop_id": "palma",
+    "display_name": "Palma Estació Intermodal",
+    "official_name": "Estació Intermodal / Palma",
+    "aliases": [
+      "palma",
+      "estacio intermodal",
+      "estació intermodal",
+      "intermodal",
+      "palma intermodal",
+      "plaça espanya",
+      "plaça d'espanya",
+      "plaza españa",
+      "plaza de españa",
+      "palma estacio",
+      "palma estació"
+    ],
+    "common_typos": [
+      "plama",
+      "palam",
+      "pama",
+      "estacio intermoda",
+      "estació intermoda",
+      "placa espanya",
+      "placa d'espanya"
+    ],
+    "modes": ["train", "metro"],
+    "routes": ["T1", "T2", "T3", "M1"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "jacint_verdaguer",
+    "display_name": "Jacint Verdaguer",
+    "official_name": "Jacint Verdaguer",
+    "aliases": [
+      "jacint verdaguer",
+      "verdaguer",
+      "estacio jacint verdaguer",
+      "estació jacint verdaguer"
+    ],
+    "common_typos": [
+      "jascint verdaguer",
+      "jacint verdaguer",
+      "jacin verdaguer",
+      "jacint verdaguer",
+      "jacinto verdaguer"
+    ],
+    "modes": ["train", "metro"],
+    "routes": ["T1", "T2", "T3", "M1"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "son_costa_son_fortesa",
+    "display_name": "Son Costa / Son Fortesa",
+    "official_name": "Son Costa / Son Fortesa",
+    "aliases": [
+      "son costa son fortesa",
+      "son costa",
+      "son fortesa",
+      "son costa / son fortesa",
+      "son costa-son fortesa"
+    ],
+    "common_typos": [
+      "son coste",
+      "son costra",
+      "son fortessa",
+      "son fortesa",
+      "son costa fortesa"
+    ],
+    "modes": ["train", "metro"],
+    "routes": ["T1", "T2", "T3", "M1"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "son_fuster",
+    "display_name": "Son Fuster",
+    "official_name": "Son Fuster",
+    "aliases": [
+      "son fuster",
+      "estacio son fuster",
+      "estació son fuster",
+      "son fuster tren"
+    ],
+    "common_typos": [
+      "son fustre",
+      "son fuster",
+      "som fuster"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "son_cladera_es_vivero",
+    "display_name": "Son Cladera / Es Vivero",
+    "official_name": "Son Cladera / Es Vivero",
+    "aliases": [
+      "son cladera es vivero",
+      "son cladera",
+      "es vivero",
+      "son cladera / es vivero",
+      "son cladera-es vivero",
+      "vivero"
+    ],
+    "common_typos": [
+      "son cladera es viver",
+      "son cladera es viviero",
+      "son cladera vivero",
+      "son cladere",
+      "es viviero"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "verge_de_lluc",
+    "display_name": "Verge de Lluc",
+    "official_name": "Verge de Lluc",
+    "aliases": [
+      "verge de lluc",
+      "verge lluc",
+      "lluc",
+      "estacio verge de lluc",
+      "estació verge de lluc"
+    ],
+    "common_typos": [
+      "verge de luc",
+      "verge del lluc",
+      "verge de lluch",
+      "verge lluch"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "pont_dinca",
+    "display_name": "Pont d'Inca",
+    "official_name": "Pont d'Inca",
+    "aliases": [
+      "pont d'inca",
+      "pont dinca",
+      "pont de inca",
+      "pont inca"
+    ],
+    "common_typos": [
+      "pont dinaca",
+      "pont dincha",
+      "pont d inc",
+      "pont d'inca",
+      "pont dinca"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "pont_dinca_nou",
+    "display_name": "Pont d'Inca Nou",
+    "official_name": "Pont d'Inca Nou",
+    "aliases": [
+      "pont d'inca nou",
+      "pont dinca nou",
+      "pont de inca nou",
+      "pont inca nou"
+    ],
+    "common_typos": [
+      "pont dinca nu",
+      "pont d'inca nou",
+      "pont inca nou",
+      "pont dinca nou"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "poligon_de_marratxi",
+    "display_name": "Polígon de Marratxí",
+    "official_name": "Polígon de Marratxí",
+    "aliases": [
+      "poligon de marratxi",
+      "polígon de marratxí",
+      "poligon marratxi",
+      "polígon marratxí",
+      "poligono de marratxi",
+      "polígono de marratxí"
+    ],
+    "common_typos": [
+      "poligon de marraxi",
+      "poligon de marratxi",
+      "poligon marratxi",
+      "poligon marratxí",
+      "poligono marratxi"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "marratxi",
+    "display_name": "Marratxí",
+    "official_name": "Marratxí",
+    "aliases": [
+      "marratxi",
+      "marratxí"
+    ],
+    "common_typos": [
+      "marraxi",
+      "marratxi",
+      "marratxi",
+      "marratx",
+      "marratchi"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "es_caulls",
+    "display_name": "Es Caülls",
+    "official_name": "Es Caülls",
+    "aliases": [
+      "es caulls",
+      "caulls",
+      "es caülls",
+      "caülls"
+    ],
+    "common_typos": [
+      "es cauls",
+      "cauls",
+      "es caull",
+      "es caüll",
+      "escauills"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "santa_maria",
+    "display_name": "Santa Maria",
+    "official_name": "Santa Maria",
+    "aliases": [
+      "santa maria",
+      "santa maria del cami",
+      "santa maria del camí"
+    ],
+    "common_typos": [
+      "santa maria del cami",
+      "santa maria del camí",
+      "santamaria",
+      "santa maría"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "alaro_consell",
+    "display_name": "Alaró / Consell",
+    "official_name": "Alaró / Consell",
+    "aliases": [
+      "alaro consell",
+      "alaró consell",
+      "alaro",
+      "alaró",
+      "consell",
+      "alaro / consell",
+      "alaró / consell"
+    ],
+    "common_typos": [
+      "alero",
+      "alaro",
+      "alaró",
+      "consel",
+      "consell",
+      "alaro-consell"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "binissalem",
+    "display_name": "Binissalem",
+    "official_name": "Binissalem",
+    "aliases": [
+      "binissalem"
+    ],
+    "common_typos": [
+      "binisalem",
+      "binissalen",
+      "binissalem",
+      "benissalem"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "lloseta",
+    "display_name": "Lloseta",
+    "official_name": "Lloseta",
+    "aliases": [
+      "lloseta"
+    ],
+    "common_typos": [
+      "loseta",
+      "llosetta",
+      "llosete",
+      "yoseta"
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "inca",
+    "display_name": "Inca",
+    "official_name": "Inca",
+    "aliases": [
+      "inca"
+    ],
+    "common_typos": [
+      "inca",
+      "inca.",
+      "incaa",
+      "inca "
+    ],
+    "modes": ["train"],
+    "routes": ["T1", "T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "constancia_hospital_inca",
+    "display_name": "Constància / Hospital d'Inca",
+    "official_name": "Constància / Hospital d’Inca",
+    "aliases": [
+      "constancia hospital inca",
+      "constància hospital inca",
+      "hospital d'inca",
+      "hospital dinca",
+      "hospital de inca",
+      "constancia",
+      "constància"
+    ],
+    "common_typos": [
+      "constancia hospital",
+      "constança hospital inca",
+      "hospital inca",
+      "ospital d'inca",
+      "hospital dinaca"
+    ],
+    "modes": ["train"],
+    "routes": ["T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "enllac",
+    "display_name": "Enllaç",
+    "official_name": "Enllaç",
+    "aliases": [
+      "enllac",
+      "enllaç",
+      "estacio enllac",
+      "estació enllaç"
+    ],
+    "common_typos": [
+      "enlac",
+      "enllach",
+      "enlla",
+      "enllaç",
+      "enllac"
+    ],
+    "modes": ["train"],
+    "routes": ["T2", "T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "sineu",
+    "display_name": "Sineu",
+    "official_name": "Sineu",
+    "aliases": [
+      "sineu"
+    ],
+    "common_typos": [
+      "sineo",
+      "sineus",
+      "sinue",
+      "sineu"
+    ],
+    "modes": ["train"],
+    "routes": ["T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "petra",
+    "display_name": "Petra",
+    "official_name": "Petra",
+    "aliases": [
+      "petra"
+    ],
+    "common_typos": [
+      "petras",
+      "petre",
+      "preta"
+    ],
+    "modes": ["train"],
+    "routes": ["T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "manacor",
+    "display_name": "Manacor",
+    "official_name": "Manacor",
+    "aliases": [
+      "manacor"
+    ],
+    "common_typos": [
+      "manacot",
+      "manacord",
+      "manacor",
+      "manacor "
+    ],
+    "modes": ["train"],
+    "routes": ["T3"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "llubi",
+    "display_name": "Llubí",
+    "official_name": "Llubí",
+    "aliases": [
+      "llubi",
+      "llubí"
+    ],
+    "common_typos": [
+      "lubi",
+      "llubi",
+      "llubí",
+      "llub"
+    ],
+    "modes": ["train"],
+    "routes": ["T2"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "muro",
+    "display_name": "Muro",
+    "official_name": "Muro",
+    "aliases": [
+      "muro"
+    ],
+    "common_typos": [
+      "muro",
+      "moru",
+      "murro"
+    ],
+    "modes": ["train"],
+    "routes": ["T2"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "sa_pobla",
+    "display_name": "Sa Pobla",
+    "official_name": "Sa Pobla",
+    "aliases": [
+      "sa pobla",
+      "la pobla",
+      "pobla",
+      "sa pobla de mallorca"
+    ],
+    "common_typos": [
+      "sapobla",
+      "sa poble",
+      "la poble",
+      "sa pobla",
+      "pobla"
+    ],
+    "modes": ["train"],
+    "routes": ["T2"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "son_fuster_vell",
+    "display_name": "Son Fuster Vell",
+    "official_name": "Son Fuster Vell",
+    "aliases": [
+      "son fuster vell",
+      "son fuster viejo",
+      "son fuster vell metro"
+    ],
+    "common_typos": [
+      "son fuster vel",
+      "son fuster vell",
+      "son fustre vell",
+      "son fuster vey"
+    ],
+    "modes": ["metro"],
+    "routes": ["M1"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "son_castello",
+    "display_name": "Son Castelló",
+    "official_name": "Son Castelló",
+    "aliases": [
+      "son castello",
+      "son castelló",
+      "poligon son castello",
+      "polígon son castelló"
+    ],
+    "common_typos": [
+      "son castelo",
+      "son castello",
+      "son castelló",
+      "son castell"
+    ],
+    "modes": ["metro"],
+    "routes": ["M1"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "gran_via_asima",
+    "display_name": "Gran Via Asima",
+    "official_name": "Gran Via Asima",
+    "aliases": [
+      "gran via asima",
+      "gran vía asima",
+      "asima"
+    ],
+    "common_typos": [
+      "gran bia asima",
+      "gran via assim",
+      "gran via asina",
+      "granvia asima"
+    ],
+    "modes": ["metro"],
+    "routes": ["M1"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "cami_dels_reis",
+    "display_name": "Camí dels Reis",
+    "official_name": "Camí dels Reis",
+    "aliases": [
+      "cami dels reis",
+      "camí dels reis",
+      "camino de los reyes",
+      "camí reis",
+      "cami reis"
+    ],
+    "common_typos": [
+      "cami del reis",
+      "cami dels reys",
+      "camí dels reys",
+      "cami des reis"
+    ],
+    "modes": ["metro"],
+    "routes": ["M1"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "son_sardina",
+    "display_name": "Son Sardina",
+    "official_name": "Son Sardina",
+    "aliases": [
+      "son sardina"
+    ],
+    "common_typos": [
+      "son sardinia",
+      "son sardin",
+      "son sardinas"
+    ],
+    "modes": ["metro"],
+    "routes": ["M1"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "uib",
+    "display_name": "UIB",
+    "official_name": "UIB",
+    "aliases": [
+      "uib",
+      "universitat",
+      "universitat de les illes balears",
+      "universidad",
+      "universidad de las islas baleares"
+    ],
+    "common_typos": [
+      "uiv",
+      "uob",
+      "uni",
+      "unib",
+      "universitat illes balears"
+    ],
+    "modes": ["metro"],
+    "routes": ["M1"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  },
+  {
+    "stop_id": "parc_bit",
+    "display_name": "Parc Bit",
+    "official_name": "Parc Bit",
+    "aliases": [
+      "parc bit",
+      "parcbit",
+      "parque bit",
+      "parc balear d'innovacio tecnologica",
+      "parc balear d'innovació tecnològica"
+    ],
+    "common_typos": [
+      "park bit",
+      "parc bitt",
+      "parc-bit",
+      "parc vit",
+      "parc bit"
+    ],
+    "modes": ["metro"],
+    "routes": ["M1"],
+    "valid_rail_stop": true,
+    "valid_train_station": true
+  }
+]

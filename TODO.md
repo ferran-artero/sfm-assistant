@@ -32,10 +32,10 @@ Que el backend arrenqui i respongui encara que no tengui lògica real.
 ```text
 ## FASE 2 — Dades inicials de la demo
 
-[ ] Omplir stations.json amb estacions vàlides.
-[ ] Omplir places_without_train.json amb pobles sense tren.
-[ ] Crear schedules_sample.json amb horaris de prova.
-[ ] Definir un format clar per representar horaris.
+[x] Omplir stations.json amb estacions vàlides.
+[x] Omplir places_without_train.json amb pobles sense tren.
+[x] Crear schedules_sample.json amb horaris de prova.
+[x] Definir un format clar per representar horaris.
 
 Objectiu:
 Tenir una petita base de dades falsa però controlada per poder provar el chatbot.
