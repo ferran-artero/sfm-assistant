@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,6 +11,7 @@ from app.services.intent_service import intent_service
 from app.services.llm_service import llm_service
 from app.services.response_service import response_service
 from app.services.hallucination_guard import hallucination_guard
+from app.services.chat_service import chat_service
 
 
 app = FastAPI(
@@ -293,12 +292,7 @@ def debug_clear_hallucination_log():
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
-    conversation_id = request.conversation_id or str(uuid4())
-
-    return ChatResponse(
-        conversation_id=conversation_id,
-        response=(
-            "Hola! Encara estic en fase inicial, però aviat podré ajudar-te "
-            "a consultar horaris de tren de Mallorca en català."
-        ),
+    return chat_service.handle_chat(
+        message=request.message,
+        conversation_id=request.conversation_id,
     )

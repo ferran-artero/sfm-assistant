@@ -166,16 +166,16 @@ Evitar que Gemini s’inventi trens.
 ```text
 ## FASE 10 — Connectar el flux complet dins /chat
 
-[ ] Rebre message i conversation_id.
-[ ] Crear conversation_id si no existeix.
-[ ] Analitzar missatge amb Intent Service.
-[ ] Completar dades amb Conversation Service.
-[ ] Validar origen i destinació amb Station Service.
-[ ] Consultar Train Service si la consulta és completa.
-[ ] Generar resposta amb Response Service.
-[ ] Validar anti-al·lucinacions.
-[ ] Guardar nou context.
-[ ] Retornar resposta al frontend.
+[x] Rebre message i conversation_id.
+[x] Crear conversation_id si no existeix.
+[x] Analitzar missatge amb Intent Service.
+[x] Completar dades amb Conversation Service.
+[x] Validar origen i destinació amb Station Service.
+[x] Consultar Train Service si la consulta és completa.
+[x] Generar resposta amb Response Service.
+[x] Validar anti-al·lucinacions.
+[x] Guardar nou context.
+[x] Retornar resposta al frontend.
 
 Objectiu:
 Tenir el backend complet de la demo.
@@ -184,13 +184,13 @@ Tenir el backend complet de la demo.
 ```text
 ## FASE 11 — Frontend senzill
 
-[ ] Crear frontend amb Vite + React.
-[ ] Crear una pantalla de xat simple.
-[ ] Guardar conversation_id al navegador.
-[ ] Enviar missatges a POST /chat.
-[ ] Mostrar resposta del bot.
-[ ] Afegir estat de carregant.
-[ ] Afegir botó per reiniciar conversa.
+[x] Crear frontend amb Vite + React.
+[x] Crear una pantalla de xat simple.
+[x] Guardar conversation_id al navegador.
+[x] Enviar missatges a POST /chat.
+[x] Mostrar resposta del bot.
+[x] Afegir estat de carregant.
+[x] Afegir botó per reiniciar conversa.
 
 Objectiu:
 Tenir una demo visual usable.

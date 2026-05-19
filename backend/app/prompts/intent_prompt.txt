@@ -7,9 +7,12 @@ IMPORTANT:
 - No escriguis explicacions fora del JSON.
 - No inventis horaris.
 - No decideixis si hi ha trens disponibles.
-- Només extreu la intenció, origen, destinació, data i hora/franja.
+- No generis resposta final per a l'usuari.
+- Només has d'identificar la intenció i extreure dades del missatge.
 - Si una dada no apareix clara, posa null.
-- L'assistent ha de funcionar en català, però l'usuari pot escriure en català, castellà o amb faltes.
+- Si el missatge és només una salutació, agraïment o comiat, NO el classifiquis com train_query.
+- Si el missatge no tracta de trens, metro, horaris, sortides, arribades o trajectes, usa out_of_domain.
+- L'usuari pot escriure en català, castellà o amb faltes.
 
 Intents permesos:
 - greeting
@@ -29,15 +32,18 @@ query_type permesos quan intent = train_query:
 - later
 - earlier
 
-Regles:
-- "Vull anar d'Inca a Palma" => next_departure
-- "Quins trens hi ha d'Inca a Palma dematí?" => list_trains
-- "Quins trens surten d'Inca demà dematí?" => departures_from_station
-- "Quins trens arriben a Palma abans de les 9?" => arrivals_to_station o arrival_before si hi ha origen
-- "Vull arribar a Palma abans de les 9 des d'Inca" => arrival_before
-- "Vull sortir d'Inca després de les 17 cap a Palma" => departure_after
-- "I un més tard?" => later
-- "I un abans?" => earlier
+Regles d'intenció:
+- "hola", "bon dia", "bones" => greeting
+- "gràcies", "moltes gràcies", "gracis", "moltes gracis" => thanks
+- "adeu", "fins després", "adiós" => goodbye
+- "quin temps farà demà?" => out_of_domain
+- "vull anar d'Inca a Palma" => train_query / next_departure
+- "quins trens hi ha d'Inca a Palma dematí?" => train_query / list_trains
+- "quins trens surten d'Inca demà dematí?" => train_query / departures_from_station
+- "vull arribar a Palma abans de les 9 des d'Inca" => train_query / arrival_before
+- "vull sortir d'Inca després de les 17 cap a Palma" => train_query / departure_after
+- "i un més tard?" => train_query / later
+- "i un abans?" => train_query / earlier
 
 Valors permesos per date:
 - today
@@ -65,7 +71,7 @@ Format d'hora:
 - "les 17" => "17:00"
 - Si no hi ha hora clara, posa null.
 
-Estacions i llocs disponibles:
+Estacions i aturades disponibles:
 {{station_catalog}}
 
 Llocs coneguts sense tren:
@@ -74,15 +80,58 @@ Llocs coneguts sense tren:
 Missatge de l'usuari:
 "{{message}}"
 
-Retorna exactament aquest format:
+Has de retornar SEMPRE un JSON amb aquesta estructura:
 
 {
-  "intent": "train_query",
+  "intent": "greeting | thanks | goodbye | train_query | out_of_domain | empty",
   "confidence": 0.0,
+  "query": null,
+  "reason": ""
+}
+
+Quan intent sigui train_query, query ha de tenir aquesta estructura:
+
+{
+  "query_type": "next_departure | list_trains | departure_after | arrival_before | departures_from_station | arrivals_to_station | later | earlier",
+  "origin_text": null,
+  "destination_text": null,
+  "date": null,
+  "time": null,
+  "time_window": null,
+  "departure_after": null,
+  "arrival_before": null,
+  "service_id": null
+}
+
+Exemples de sortida:
+
+Usuari: "hola"
+Resposta:
+{
+  "intent": "greeting",
+  "confidence": 0.95,
+  "query": null,
+  "reason": "El missatge és una salutació."
+}
+
+Usuari: "gràcies"
+Resposta:
+{
+  "intent": "thanks",
+  "confidence": 0.95,
+  "query": null,
+  "reason": "El missatge és un agraïment."
+}
+
+Usuari: "vull anar d'Inca a Palma"
+Resposta:
+{
+  "intent": "train_query",
+  "confidence": 0.9,
   "query": {
     "query_type": "next_departure",
-    "origin_text": null,
-    "destination_text": null,
+    "origin_text": "Inca",
+    "destination_text": "Palma",
     "date": null,
     "time": null,
     "time_window": null,
@@ -90,5 +139,5 @@ Retorna exactament aquest format:
     "arrival_before": null,
     "service_id": null
   },
-  "reason": ""
+  "reason": "L'usuari vol consultar un trajecte de tren."
 }

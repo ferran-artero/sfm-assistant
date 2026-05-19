@@ -9,7 +9,10 @@ from app.config import settings
 
 
 PLACEHOLDER_API_KEYS = {
-    "AIzaSyArqs4VXTrzxDti2ahgRsfsCx6pcwxdIX0",
+    "",
+    "posa_aqui_la_teva_clau",
+    "your_api_key_here",
+    "la_teva_clau_real_aqui",
 }
 
 

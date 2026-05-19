@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Any, Optional
 
 
 class ChatRequest(BaseModel):
@@ -18,3 +18,6 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     conversation_id: str
     response: str
+    intent_source: Optional[str] = None
+    response_source: Optional[str] = None
+    debug: Optional[dict[str, Any]] = None

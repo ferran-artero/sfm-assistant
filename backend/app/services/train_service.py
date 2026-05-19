@@ -163,6 +163,80 @@ class TrainService:
         results = self._sort_by_departure(results)
         return results[:limit]
 
+    def search_departures_from_station(
+        self,
+        origin_stop_id: str,
+        start_time: str,
+        end_time: str,
+        service_id: Optional[str] = None,
+        limit: int = 10,
+    ) -> list[dict[str, Any]]:
+        """
+        Cerca sortides des d'una estació dins una finestra horària.
+        Agafa com a destinació el final del trajecte.
+        """
+        results = []
+
+        start_minutes = time_to_minutes(start_time)
+        end_minutes = time_to_minutes(end_time)
+
+        for trip in self._get_candidate_trips(service_id):
+            stop_times = trip.get("stop_times", [])
+
+            if not stop_times:
+                continue
+
+            final_stop_id = stop_times[-1].get("stop_id")
+            segment = self._extract_segment(trip, origin_stop_id, final_stop_id)
+
+            if not segment:
+                continue
+
+            departure_minutes = time_to_minutes(segment["origin"]["time"])
+
+            if start_minutes <= departure_minutes <= end_minutes:
+                results.append(segment)
+
+        results = self._sort_by_departure(results)
+        return results[:limit]
+
+    def search_arrivals_to_station(
+        self,
+        destination_stop_id: str,
+        start_time: str,
+        end_time: str,
+        service_id: Optional[str] = None,
+        limit: int = 10,
+    ) -> list[dict[str, Any]]:
+        """
+        Cerca arribades a una estació dins una finestra horària.
+        Agafa com a origen l'inici del trajecte.
+        """
+        results = []
+
+        start_minutes = time_to_minutes(start_time)
+        end_minutes = time_to_minutes(end_time)
+
+        for trip in self._get_candidate_trips(service_id):
+            stop_times = trip.get("stop_times", [])
+
+            if not stop_times:
+                continue
+
+            first_stop_id = stop_times[0].get("stop_id")
+            segment = self._extract_segment(trip, first_stop_id, destination_stop_id)
+
+            if not segment:
+                continue
+
+            arrival_minutes = time_to_minutes(segment["destination"]["time"])
+
+            if start_minutes <= arrival_minutes <= end_minutes:
+                results.append(segment)
+
+        results = self._sort_by_arrival(results)
+        return results[:limit]
+
     def _get_candidate_trips(
         self,
         service_id: Optional[str] = None,
