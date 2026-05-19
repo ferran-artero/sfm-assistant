@@ -58,13 +58,13 @@ Que el sistema no intenti cercar trens cap a llocs que no tenen estació.
 ```text
 ## FASE 4 — Train Service amb dades de prova
 
-[ ] Carregar schedules_sample.json.
-[ ] Crear search_next_departure().
-[ ] Crear search_trains_in_window().
-[ ] Crear search_arrival_before().
-[ ] Crear search_departure_after().
-[ ] Retornar sempre resultats estructurats, no text final.
-[ ] Provar consultes simples d’Inca a Palma.
+[x] Carregar schedules_sample.json.
+[x] Crear search_next_departure().
+[x] Crear search_trains_in_window().
+[x] Crear search_arrival_before().
+[x] Crear search_departure_after().
+[x] Retornar sempre resultats estructurats, no text final.
+[x] Provar consultes simples d’Inca a Palma.
 
 Objectiu:
 Que el backend pugui consultar horaris sense IA.

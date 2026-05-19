@@ -7,6 +7,7 @@ from app.config import settings
 from app.models import ChatRequest, ChatResponse
 
 from app.services.station_service import station_service
+from app.services.train_service import train_service
 
 
 app = FastAPI(
@@ -42,6 +43,74 @@ def health_check():
 @app.get("/debug/station/{query}")
 def debug_validate_station(query: str):
     return station_service.validate_station(query)
+
+
+@app.get("/debug/trains/next")
+def debug_next_departure(
+    origin: str,
+    destination: str,
+    after_time: str = "00:00",
+    service_id: str | None = None,
+    limit: int = 3,
+):
+    return train_service.search_next_departure(
+        origin_stop_id=origin,
+        destination_stop_id=destination,
+        after_time=after_time,
+        service_id=service_id,
+        limit=limit,
+    )
+
+
+@app.get("/debug/trains/window")
+def debug_trains_in_window(
+    origin: str,
+    destination: str,
+    start_time: str,
+    end_time: str,
+    service_id: str | None = None,
+):
+    return train_service.search_trains_in_window(
+        origin_stop_id=origin,
+        destination_stop_id=destination,
+        start_time=start_time,
+        end_time=end_time,
+        service_id=service_id,
+    )
+
+
+@app.get("/debug/trains/arrival-before")
+def debug_arrival_before(
+    origin: str,
+    destination: str,
+    arrival_time: str,
+    service_id: str | None = None,
+    limit: int = 5,
+):
+    return train_service.search_arrival_before(
+        origin_stop_id=origin,
+        destination_stop_id=destination,
+        arrival_time=arrival_time,
+        service_id=service_id,
+        limit=limit,
+    )
+
+
+@app.get("/debug/trains/departure-after")
+def debug_departure_after(
+    origin: str,
+    destination: str,
+    departure_time: str,
+    service_id: str | None = None,
+    limit: int = 5,
+):
+    return train_service.search_departure_after(
+        origin_stop_id=origin,
+        destination_stop_id=destination,
+        departure_time=departure_time,
+        service_id=service_id,
+        limit=limit,
+    )
 
 
 @app.post("/chat", response_model=ChatResponse)
