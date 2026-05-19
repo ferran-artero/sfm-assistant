@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.models import ChatRequest, ChatResponse
 
+from app.services.station_service import station_service
+
 
 app = FastAPI(
     title=settings.app_name,
@@ -35,6 +37,11 @@ def health_check():
         "environment": settings.environment,
         "language": settings.response_language,
     }
+
+
+@app.get("/debug/station/{query}")
+def debug_validate_station(query: str):
+    return station_service.validate_station(query)
 
 
 @app.post("/chat", response_model=ChatResponse)

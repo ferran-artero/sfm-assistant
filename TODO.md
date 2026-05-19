@@ -44,12 +44,12 @@ Tenir una petita base de dades falsa però controlada per poder provar el chatbo
 ```text
 ## FASE 3 — Station Service
 
-[ ] Crear funció per carregar stations.json.
-[ ] Crear funció per carregar places_without_train.json.
-[ ] Implementar validate_station().
-[ ] Detectar estacions vàlides: Palma, Inca, Manacor, Sineu...
-[ ] Detectar llocs coneguts sense tren: Vilafranca, Alcúdia, Llucmajor...
-[ ] Detectar errors simples d’escriptura com “Plama” → “Palma”.
+[x] Crear funció per carregar stations.json.
+[x] Crear funció per carregar places_without_train.json.
+[x] Implementar validate_station().
+[x] Detectar estacions vàlides: Palma, Inca, Manacor, Sineu...
+[x] Detectar llocs coneguts sense tren: Vilafranca, Alcúdia, Llucmajor...
+[x] Detectar errors simples d’escriptura com “Plama” → “Palma”.
 
 Objectiu:
 Que el sistema no intenti cercar trens cap a llocs que no tenen estació.
