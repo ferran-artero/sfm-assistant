@@ -11,6 +11,7 @@ from app.services.train_service import train_service
 from app.services.conversation_service import conversation_service
 from app.services.intent_service import intent_service
 from app.services.llm_service import llm_service
+from app.services.response_service import response_service
 
 
 app = FastAPI(
@@ -169,6 +170,81 @@ def debug_intent(message: str):
 @app.get("/debug/llm")
 def debug_llm():
     return llm_service.get_status()
+
+
+@app.get("/debug/response/simple")
+def debug_simple_response(intent: str):
+    intent_result = {
+        "intent": intent,
+    }
+
+    return response_service.build_simple_response(intent_result)
+
+
+@app.get("/debug/response/trains")
+def debug_train_response(
+    origin: str,
+    destination: str,
+    after_time: str = "00:00",
+    service_id: str | None = None,
+    limit: int = 3,
+):
+    query = {
+        "query_type": "next_departure",
+        "origin_stop_id": origin,
+        "destination_stop_id": destination,
+        "time": after_time,
+        "service_id": service_id,
+    }
+
+    results = train_service.search_next_departure(
+        origin_stop_id=origin,
+        destination_stop_id=destination,
+        after_time=after_time,
+        service_id=service_id,
+        limit=limit,
+    )
+
+    response = response_service.build_train_results_response(
+        query=query,
+        results=results,
+    )
+
+    return {
+        "query": query,
+        "results": results,
+        "response": response,
+    }
+
+
+@app.get("/debug/response/place-without-train")
+def debug_place_without_train_response(place: str):
+    validation = station_service.validate_station(place)
+
+    if validation.get("status") != "known_place_without_train":
+        return {
+            "validation": validation,
+            "response": {
+                "response": "Aquest lloc no s'ha detectat com a poble conegut sense tren.",
+                "source": "template",
+            },
+        }
+
+    place_info = {
+        "type": "place_without_train",
+        "id": validation.get("place_id"),
+        "display_name": validation.get("display_name"),
+        "message": validation.get("message"),
+    }
+
+    response = response_service.build_known_place_without_train_response(
+        places=[place_info],
+    )
+
+    return {
+        "validation": validation,
+        "response": response,
+    }
 
 
 @app.post("/chat", response_model=ChatResponse)

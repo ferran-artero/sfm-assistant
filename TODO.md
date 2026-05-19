@@ -109,13 +109,13 @@ Aquesta fase és important. Encara que després usem Gemini, tenir unes regles m
 ```text
 ## FASE 7 — Integració de Gemini per entendre missatges
 
-[ ] Crear llm_service.py.
-[ ] Configurar GEMINI_API_KEY.
-[ ] Crear prompt intent_prompt.txt.
-[ ] Fer que Gemini retorni només JSON.
-[ ] Crear analyze_message().
-[ ] Validar que el JSON rebut és correcte.
-[ ] Si Gemini falla, usar fallback de regles.
+[x] Crear llm_service.py.
+[x] Configurar GEMINI_API_KEY.
+[x] Crear prompt intent_prompt.txt.
+[x] Fer que Gemini retorni només JSON.
+[x] Crear analyze_message().
+[x] Validar que el JSON rebut és correcte.
+[x] Si Gemini falla, usar fallback de regles.
 
 Objectiu:
 Que Gemini pugui convertir llenguatge natural en dades estructurades.
@@ -138,12 +138,12 @@ Exemple de sortida esperada:
 ```text
 ## FASE 8 — Response Service
 
-[ ] Crear response_service.py.
-[ ] Crear respostes segures sense Gemini.
-[ ] Crear prompt response_prompt.txt.
-[ ] Passar a Gemini només dades verificades.
-[ ] Forçar resposta sempre en català.
-[ ] Prohibir que Gemini inventi hores, estacions o trajectes.
+[x] Crear response_service.py.
+[x] Crear respostes segures sense Gemini.
+[x] Crear prompt response_prompt.txt.
+[x] Passar a Gemini només dades verificades.
+[x] Forçar resposta sempre en català.
+[x] Prohibir que Gemini inventi hores, estacions o trajectes.
 [ ] Crear fallback amb plantilla si Gemini falla.
 
 Objectiu:
