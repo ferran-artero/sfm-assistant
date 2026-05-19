@@ -9,6 +9,7 @@ from app.models import ChatRequest, ChatResponse
 from app.services.station_service import station_service
 from app.services.train_service import train_service
 from app.services.conversation_service import conversation_service
+from app.services.intent_service import intent_service
 
 
 app = FastAPI(
@@ -157,6 +158,12 @@ def debug_reset_conversation(conversation_id: str):
         "conversation_id": conversation_id,
         "deleted": deleted,
     }
+
+
+@app.get("/debug/intent")
+def debug_intent(message: str):
+    return intent_service.analyze_message(message)
+
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):

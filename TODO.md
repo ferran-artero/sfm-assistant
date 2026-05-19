@@ -94,11 +94,11 @@ Que el chatbot pugui mantenir un mínim de context.
 ```text
 ## FASE 6 — Intent Service sense Gemini, només regles simples
 
-[ ] Detectar salutacions.
-[ ] Detectar consultes de tren bàsiques.
-[ ] Detectar “gràcies” i “adeu”.
-[ ] Detectar frases fora de domini.
-[ ] Retornar una estructura tipus intent.
+[x] Detectar salutacions.
+[x] Detectar consultes de tren bàsiques.
+[x] Detectar “gràcies” i “adeu”.
+[x] Detectar frases fora de domini.
+[x] Retornar una estructura tipus intent.
 
 Objectiu:
 Tenir una versió funcional abans d’afegir IA.
