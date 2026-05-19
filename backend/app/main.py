@@ -12,6 +12,7 @@ from app.services.conversation_service import conversation_service
 from app.services.intent_service import intent_service
 from app.services.llm_service import llm_service
 from app.services.response_service import response_service
+from app.services.hallucination_guard import hallucination_guard
 
 
 app = FastAPI(
@@ -244,6 +245,49 @@ def debug_place_without_train_response(place: str):
     return {
         "validation": validation,
         "response": response,
+    }
+
+
+@app.get("/debug/hallucination/check")
+def debug_hallucination_check(
+    response_text: str,
+    origin: str = "inca",
+    destination: str = "palma",
+    after_time: str = "08:00",
+    service_id: str | None = "train_weekday",
+    limit: int = 3,
+):
+    results = train_service.search_next_departure(
+        origin_stop_id=origin,
+        destination_stop_id=destination,
+        after_time=after_time,
+        service_id=service_id,
+        limit=limit,
+    )
+
+    validation = hallucination_guard.validate_response(
+        response=response_text,
+        results=results,
+    )
+
+    return {
+        "response_text": response_text,
+        "results": results,
+        "validation": validation,
+    }
+
+
+@app.get("/debug/hallucination/log")
+def debug_hallucination_log():
+    return hallucination_guard.get_error_log()
+
+
+@app.delete("/debug/hallucination/log")
+def debug_clear_hallucination_log():
+    hallucination_guard.clear_error_log()
+
+    return {
+        "deleted": True,
     }
 
 

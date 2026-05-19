@@ -1,10 +1,10 @@
 import json
-import re
 from pathlib import Path
 from typing import Any
 
 from app.services.llm_service import llm_service
 from app.services.station_service import station_service
+from app.services.hallucination_guard import hallucination_guard
 
 
 PROMPT_FILE = Path(__file__).resolve().parents[1] / "prompts" / "response_prompt.txt"
@@ -142,9 +142,13 @@ class ResponseService:
                     context=safe_context,
                 )
 
-                self._validate_response_does_not_invent_times(
+                hallucination_guard.assert_response_is_safe(
                     response=response,
                     results=safe_results,
+                    context={
+                        "query": safe_query,
+                        "source": "response_service",
+                    },
                 )
 
                 return {
@@ -328,39 +332,6 @@ class ResponseService:
 
         return "No he trobat cap resultat amb els criteris indicats."
 
-    def _validate_response_does_not_invent_times(
-        self,
-        response: str,
-        results: list[dict[str, Any]],
-    ) -> None:
-        """
-        Validació simple anti-al·lucinació:
-        si Gemini escriu una hora HH:MM que no apareix als resultats,
-        descartam la resposta.
-        """
-        times_in_response = set(re.findall(r"\b(?:[01]\d|2[0-3]):[0-5]\d\b", response))
-
-        if not times_in_response:
-            return
-
-        allowed_times = set()
-
-        for result in results:
-            origin_time = result.get("origin", {}).get("time")
-            destination_time = result.get("destination", {}).get("time")
-
-            if origin_time:
-                allowed_times.add(origin_time)
-
-            if destination_time:
-                allowed_times.add(destination_time)
-
-        invented_times = times_in_response - allowed_times
-
-        if invented_times:
-            raise ValueError(
-                f"Gemini ha escrit hores que no eren als resultats: {invented_times}"
-            )
 
     def _build_stop_name_index(self) -> dict[str, str]:
         index = {}

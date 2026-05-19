@@ -144,7 +144,7 @@ Exemple de sortida esperada:
 [x] Passar a Gemini només dades verificades.
 [x] Forçar resposta sempre en català.
 [x] Prohibir que Gemini inventi hores, estacions o trajectes.
-[ ] Crear fallback amb plantilla si Gemini falla.
+[x] Crear fallback amb plantilla si Gemini falla.
 
 Objectiu:
 Que les respostes sonin naturals, però només usin informació real.
@@ -153,11 +153,11 @@ Que les respostes sonin naturals, però només usin informació real.
 ```text
 ## FASE 9 — Validació anti-al·lucinacions
 
-[ ] Extreure hores de la resposta generada per Gemini.
-[ ] Comparar-les amb els horaris reals retornats per Train Service.
-[ ] Si apareix una hora inventada, descartar resposta.
-[ ] Retornar una plantilla segura.
-[ ] Registrar l’error per debug.
+[x] Extreure hores de la resposta generada per Gemini.
+[x] Comparar-les amb els horaris reals retornats per Train Service.
+[x] Si apareix una hora inventada, descartar resposta.
+[x] Retornar una plantilla segura.
+[x] Registrar l’error per debug.
 
 Objectiu:
 Evitar que Gemini s’inventi trens.
