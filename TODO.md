@@ -3,12 +3,12 @@
 
 ## FASE 0 — Preparació inicial del projecte
 
-[ ] Comprovar que l’estructura de carpetes està creada.
-[ ] Crear entorn virtual de Python dins backend/.
-[ ] Instal·lar dependències bàsiques.
-[ ] Crear .env a partir de .env.example.
-[ ] Crear .gitignore.
-[ ] Fer primer commit del projecte buit.
+[x] Comprovar que l’estructura de carpetes està creada.
+[x] Crear entorn virtual de Python dins backend/.
+[x] Instal·lar dependències bàsiques.
+[x] Crear .env a partir de .env.example.
+[x] Crear .gitignore.
+[x] Fer primer commit del projecte buit.
 
 Objectiu:
 Tenir el projecte ordenat i preparat per començar a programar.
@@ -17,13 +17,13 @@ Tenir el projecte ordenat i preparat per començar a programar.
 ```text
 ## FASE 1 — Backend mínim amb FastAPI
 
-[ ] Omplir requirements.txt.
-[ ] Crear config.py.
-[ ] Crear models.py amb ChatRequest i ChatResponse.
-[ ] Crear main.py amb FastAPI.
-[ ] Crear endpoint GET /health.
-[ ] Crear endpoint POST /chat amb resposta fixa.
-[ ] Executar uvicorn i comprovar /docs.
+[x] Omplir requirements.txt.
+[x] Crear config.py.
+[x] Crear models.py amb ChatRequest i ChatResponse.
+[x] Crear main.py amb FastAPI.
+[x] Crear endpoint GET /health.
+[x] Crear endpoint POST /chat amb resposta fixa.
+[x] Executar uvicorn i comprovar /docs.
 
 Objectiu:
 Que el backend arrenqui i respongui encara que no tengui lògica real.
