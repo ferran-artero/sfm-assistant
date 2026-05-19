@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from typing import Any
+import logging
 
 from app.services.llm_service import llm_service
 from app.services.station_service import station_service
@@ -9,6 +10,7 @@ from app.services.hallucination_guard import hallucination_guard
 
 PROMPT_FILE = Path(__file__).resolve().parents[1] / "prompts" / "response_prompt.txt"
 MAX_RESULTS_TO_MENTION = 5
+logger = logging.getLogger("sfm.response")
 
 
 class ResponseService:
@@ -157,6 +159,12 @@ class ResponseService:
                 }
 
             except Exception as error:
+                logger.exception(
+                    "Gemini response failed. Using template_fallback. query=%s results_count=%s",
+                    safe_query,
+                    len(safe_results),
+                )
+
                 return {
                     "response": self._build_train_results_template(
                         query=safe_query,

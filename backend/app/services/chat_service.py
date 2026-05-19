@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
+import logging
 
 from app.models import ChatResponse
 from app.services.conversation_service import conversation_service
@@ -23,6 +24,7 @@ TIME_WINDOWS = {
 
 DEFAULT_LIMIT = 5
 TIMEZONE = ZoneInfo("Europe/Madrid")
+logger = logging.getLogger("sfm.chat")
 
 
 class ChatService:
@@ -55,10 +57,19 @@ class ChatService:
         intent_result = intent_service.analyze_message(message)
         intent = intent_result.get("intent")
 
+        logger.info(
+            "Intent result | conversation_id=%s | message=%s | intent=%s | source=%s | query=%s",
+            active_conversation_id,
+            message,
+            intent,
+            intent_result.get("source"),
+            intent_result.get("query"),
+        )
+
         # 1. Salutació, gràcies, adeu, fora de domini, empty...
         if intent != "train_query":
             response_data = response_service.build_simple_response(intent_result)
-
+        
             return self._finalize_response(
                 conversation_id=active_conversation_id,
                 response_text=response_data["response"],
@@ -145,6 +156,44 @@ class ChatService:
             },
         )
 
+        logger.info(
+            "Response result | conversation_id=%s | response_source=%s | results_count=%s | llm_error=%s",
+            active_conversation_id,
+            response_data.get("source"),
+            len(results),
+            response_data.get("llm_error"),
+        )
+
+        pending_query = conversation_service.get_pending_query(active_conversation_id)
+
+        if intent != "train_query" and pending_query:
+            pending_followup_query = self._try_build_query_from_pending_followup(
+                message=message,
+                pending_query=pending_query,
+            )
+
+            if pending_followup_query:
+                logger.info(
+                    "Pending follow-up resolved | conversation_id=%s | pending_query=%s | followup_query=%s",
+                    active_conversation_id,
+                    pending_query,
+                    pending_followup_query,
+                )
+
+                intent_result = {
+                    "intent": "train_query",
+                    "confidence": 0.95,
+                    "message": message,
+                    "normalized_message": message.lower().strip(),
+                    "query": pending_followup_query,
+                    "detected_locations": [],
+                    "known_places_without_train": [],
+                    "source": "pending_context",
+                    "reason": "Resposta curta usada per completar una consulta pendent.",
+                }
+
+                intent = "train_query"
+
         # 7. Resposta final amb debug
         return self._finalize_response(
             conversation_id=active_conversation_id,
@@ -160,6 +209,107 @@ class ChatService:
                 "llm_error": response_data.get("llm_error"),
             },
         )
+
+    def _try_build_query_from_pending_followup(
+        self,
+        message: str,
+        pending_query: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        """
+        Intenta interpretar una resposta curta de l'usuari quan hi ha una consulta pendent.
+
+        Exemple:
+        pending_query = {"origin_stop_id": "inca", "destination_stop_id": None}
+        message = "manacor"
+        resultat = {"destination_stop_id": "manacor"}
+        """
+        missing_fields = conversation_service.get_missing_fields(pending_query)
+        validation = station_service.validate_station(message)
+
+        if validation.get("status") == "valid_station":
+            stop_id = validation.get("stop_id")
+
+            if "destination_stop_id" in missing_fields:
+                return {
+                    "destination_stop_id": stop_id,
+                }
+
+            if "origin_stop_id" in missing_fields:
+                return {
+                    "origin_stop_id": stop_id,
+                }
+
+        if "time_context" in missing_fields:
+            time_window = self._detect_time_window_from_followup(message)
+
+            if time_window:
+                return {
+                    "time_window": time_window,
+                }
+
+        if "departure_after" in missing_fields:
+            detected_time = self._detect_simple_time_from_followup(message)
+
+            if detected_time:
+                return {
+                    "departure_after": detected_time,
+                }
+
+        if "arrival_before" in missing_fields:
+            detected_time = self._detect_simple_time_from_followup(message)
+
+            if detected_time:
+                return {
+                    "arrival_before": detected_time,
+                }
+
+        return None
+
+    def _detect_time_window_from_followup(
+        self,
+        message: str,
+    ) -> str | None:
+        normalized = message.lower().strip()
+
+        if any(word in normalized for word in ["demati", "dematí", "mati", "matí", "mañana"]):
+            return "morning"
+
+        if any(word in normalized for word in ["migdia", "mig dia", "mediodia", "mediodía"]):
+            return "midday"
+
+        if any(word in normalized for word in ["tarda", "horabaixa", "capvespre"]):
+            return "afternoon"
+
+        if any(word in normalized for word in ["vespre", "nit", "noche"]):
+            return "evening"
+
+        return None
+
+
+    def _detect_simple_time_from_followup(
+        self,
+        message: str,
+    ) -> str | None:
+        import re
+
+        normalized = message.lower().strip()
+
+        time_with_minutes = re.search(r"\b([01]?\d|2[0-3])[:.]([0-5]\d)\b", normalized)
+
+        if time_with_minutes:
+            hour = int(time_with_minutes.group(1))
+            minute = int(time_with_minutes.group(2))
+            return f"{hour:02d}:{minute:02d}"
+
+        time_without_minutes = re.search(r"\b([0-2]?\d)\b", normalized)
+
+        if time_without_minutes:
+            hour = int(time_without_minutes.group(1))
+
+            if 0 <= hour <= 23:
+                return f"{hour:02d}:00"
+
+        return None
 
     def _handle_relative_query(
         self,
@@ -228,6 +378,14 @@ class ChatService:
         return self._finalize_response(
             conversation_id=conversation_id,
             response_text=response_data["response"],
+            intent_source="gemini_or_rules",
+            response_source=response_data.get("source"),
+            debug={
+                "relative_query_type": query_type,
+                "query": new_query,
+                "results_count": len(results),
+                "llm_error": response_data.get("llm_error"),
+            },
         )
 
     def _search_results_for_query(
