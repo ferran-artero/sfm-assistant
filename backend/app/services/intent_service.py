@@ -1,8 +1,55 @@
 import re
 from typing import Any
+import json
+from pathlib import Path
 
+from app.services.llm_service import llm_service
 from app.services.station_service import normalize_text, station_service
 
+
+PROMPT_FILE = Path(__file__).resolve().parents[1] / "prompts" / "intent_prompt.txt"
+
+ALLOWED_INTENTS = {
+    "greeting",
+    "thanks",
+    "goodbye",
+    "train_query",
+    "out_of_domain",
+    "empty",
+}
+
+ALLOWED_QUERY_TYPES = {
+    "next_departure",
+    "list_trains",
+    "departure_after",
+    "arrival_before",
+    "departures_from_station",
+    "arrivals_to_station",
+    "later",
+    "earlier",
+}
+
+ALLOWED_DATES = {
+    "today",
+    "tomorrow",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+    "weekend",
+    None,
+}
+
+ALLOWED_TIME_WINDOWS = {
+    "morning",
+    "midday",
+    "afternoon",
+    "evening",
+    None,
+}
 
 GREETING_WORDS = [
     "hola",
@@ -105,6 +152,26 @@ TIME_WINDOWS = {
 
 class IntentService:
     def analyze_message(self, message: str) -> dict[str, Any]:
+        """
+        Primer intenta interpretar amb Gemini.
+        Si Gemini falla, usa el parser de regles de la Fase 6.
+        """
+        if llm_service.is_available():
+            try:
+                result = self._analyze_message_with_gemini(message)
+                result["source"] = "gemini"
+                return result
+            except Exception as error:
+                fallback = self.analyze_message_with_rules(message)
+                fallback["source"] = "rules_fallback"
+                fallback["llm_error"] = str(error)
+                return fallback
+
+        fallback = self.analyze_message_with_rules(message)
+        fallback["source"] = "rules"
+        return fallback
+        
+    def analyze_message_with_rules(self, message: str) -> dict[str, Any]:
         normalized = normalize_text(message)
 
         if not normalized:
@@ -214,6 +281,204 @@ class IntentService:
             },
             "detected_locations": detected_locations,
             "known_places_without_train": known_places_without_train,
+        }
+
+    def _analyze_message_with_gemini(self, message: str) -> dict[str, Any]:
+        prompt = self._build_intent_prompt(message)
+        raw_result = llm_service.generate_json(prompt)
+
+        return self._normalize_llm_result(
+            original_message=message,
+            raw_result=raw_result,
+        )
+
+    def _build_intent_prompt(self, message: str) -> str:
+        if not PROMPT_FILE.exists():
+            raise FileNotFoundError(f"No s'ha trobat el prompt: {PROMPT_FILE}")
+
+        template = PROMPT_FILE.read_text(encoding="utf-8")
+
+        station_catalog = self._build_catalog(
+            items=station_service.stations,
+            id_field="stop_id",
+        )
+
+        places_without_train_catalog = self._build_catalog(
+            items=station_service.places_without_train,
+            id_field="place_id",
+        )
+
+        return (
+            template
+            .replace("{{message}}", message)
+            .replace("{{station_catalog}}", json.dumps(station_catalog, ensure_ascii=False))
+            .replace("{{places_without_train_catalog}}", json.dumps(places_without_train_catalog, ensure_ascii=False))
+        )
+
+    def _build_catalog(
+        self,
+        items: list[dict[str, Any]],
+        id_field: str,
+    ) -> list[dict[str, Any]]:
+        catalog = []
+
+        for item in items:
+            catalog.append(
+                {
+                    "id": item.get(id_field),
+                    "name": item.get("display_name"),
+                    "aliases": item.get("aliases", [])[:8],
+                }
+            )
+
+        return catalog
+
+    def _normalize_llm_result(
+        self,
+        original_message: str,
+        raw_result: dict[str, Any],
+    ) -> dict[str, Any]:
+        intent = raw_result.get("intent", "out_of_domain")
+
+        if intent not in ALLOWED_INTENTS:
+            raise ValueError(f"Intent no permès: {intent}")
+
+        confidence = raw_result.get("confidence", 0.7)
+
+        if intent != "train_query":
+            return {
+                "intent": intent,
+                "confidence": confidence,
+                "message": original_message,
+                "normalized_message": normalize_text(original_message),
+                "query": None,
+                "reason": raw_result.get("reason", ""),
+            }
+
+        raw_query = raw_result.get("query", {})
+
+        if not isinstance(raw_query, dict):
+            raise ValueError("El camp query no és un objecte JSON.")
+
+        query_type = raw_query.get("query_type", "next_departure")
+
+        if query_type not in ALLOWED_QUERY_TYPES:
+            query_type = "next_departure"
+
+        date = raw_query.get("date")
+        if date not in ALLOWED_DATES:
+            date = None
+
+        time_window = raw_query.get("time_window")
+        if time_window not in ALLOWED_TIME_WINDOWS:
+            time_window = None
+
+        origin_text = raw_query.get("origin_text") or raw_query.get("origin")
+        destination_text = raw_query.get("destination_text") or raw_query.get("destination")
+
+        origin_info = self._resolve_location_text(origin_text)
+        destination_info = self._resolve_location_text(destination_text)
+
+        origin_stop_id = None
+        destination_stop_id = None
+        detected_locations = []
+        known_places_without_train = []
+
+        if origin_info:
+            detected_locations.append(origin_info)
+
+            if origin_info["type"] == "station":
+                origin_stop_id = origin_info["id"]
+
+            if origin_info["type"] == "place_without_train":
+                known_places_without_train.append(origin_info)
+
+        if destination_info:
+            detected_locations.append(destination_info)
+
+            if destination_info["type"] == "station":
+                destination_stop_id = destination_info["id"]
+
+            if destination_info["type"] == "place_without_train":
+                known_places_without_train.append(destination_info)
+
+        return {
+            "intent": "train_query",
+            "confidence": confidence,
+            "message": original_message,
+            "normalized_message": normalize_text(original_message),
+            "query": {
+                "query_type": query_type,
+                "origin_stop_id": origin_stop_id,
+                "destination_stop_id": destination_stop_id,
+                "date": date,
+                "time": raw_query.get("time"),
+                "time_window": time_window,
+                "departure_after": raw_query.get("departure_after"),
+                "arrival_before": raw_query.get("arrival_before"),
+                "service_id": raw_query.get("service_id"),
+            },
+            "detected_locations": detected_locations,
+            "known_places_without_train": known_places_without_train,
+            "reason": raw_result.get("reason", ""),
+        }
+
+    def _resolve_location_text(
+        self,
+        location_text: str | None,
+    ) -> dict[str, Any] | None:
+        if not location_text:
+            return None
+
+        validation = station_service.validate_station(location_text)
+        status = validation.get("status")
+
+        if status == "valid_station":
+            return {
+                "type": "station",
+                "id": validation.get("stop_id"),
+                "display_name": validation.get("display_name"),
+                "input": location_text,
+                "status": status,
+            }
+
+        if status == "known_place_without_train":
+            return {
+                "type": "place_without_train",
+                "id": validation.get("place_id"),
+                "display_name": validation.get("display_name"),
+                "input": location_text,
+                "status": status,
+                "message": validation.get("message"),
+            }
+
+        if status == "typo_suggestion":
+            suggestion = validation.get("suggestion", {})
+
+            if suggestion.get("type") == "station":
+                return {
+                    "type": "station",
+                    "id": suggestion.get("stop_id"),
+                    "display_name": suggestion.get("display_name"),
+                    "input": location_text,
+                    "status": status,
+                }
+
+            if suggestion.get("type") == "place_without_train":
+                return {
+                    "type": "place_without_train",
+                    "id": suggestion.get("place_id"),
+                    "display_name": suggestion.get("display_name"),
+                    "input": location_text,
+                    "status": status,
+                }
+
+        return {
+            "type": "unknown",
+            "id": None,
+            "display_name": location_text,
+            "input": location_text,
+            "status": status,
         }
 
     def _detect_query_type(self, normalized_message: str) -> str:
