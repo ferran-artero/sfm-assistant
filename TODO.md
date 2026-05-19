@@ -73,13 +73,13 @@ Que el backend pugui consultar horaris sense IA.
 ```text
 ## FASE 5 — Conversation Service bàsic
 
-[ ] Crear memòria temporal per conversation_id.
-[ ] Guardar last_query.
-[ ] Guardar last_results.
-[ ] Guardar pending_query.
-[ ] Detectar quan falta origen.
-[ ] Detectar quan falta destinació.
-[ ] Permetre aclariments simples.
+[x] Crear memòria temporal per conversation_id.
+[x] Guardar last_query.
+[x] Guardar last_results.
+[x] Guardar pending_query.
+[x] Detectar quan falta origen.
+[x] Detectar quan falta destinació.
+[x] Permetre aclariments simples.
 
 Exemple:
 Usuari: Quins trens surten demà d’Inca?

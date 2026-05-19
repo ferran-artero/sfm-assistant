@@ -8,6 +8,7 @@ from app.models import ChatRequest, ChatResponse
 
 from app.services.station_service import station_service
 from app.services.train_service import train_service
+from app.services.conversation_service import conversation_service
 
 
 app = FastAPI(
@@ -112,6 +113,50 @@ def debug_departure_after(
         limit=limit,
     )
 
+@app.get("/debug/conversation/query")
+def debug_conversation_query(
+    conversation_id: str | None = None,
+    origin_stop_id: str | None = None,
+    destination_stop_id: str | None = None,
+    query_type: str = "next_departure",
+    date: str | None = None,
+    time: str | None = None,
+    time_window: str | None = None,
+    departure_after: str | None = None,
+    arrival_before: str | None = None,
+    service_id: str | None = None,
+):
+    new_query = {
+        "query_type": query_type,
+        "origin_stop_id": origin_stop_id,
+        "destination_stop_id": destination_stop_id,
+        "date": date,
+        "time": time,
+        "time_window": time_window,
+        "departure_after": departure_after,
+        "arrival_before": arrival_before,
+        "service_id": service_id,
+    }
+
+    return conversation_service.merge_with_pending_query(
+        conversation_id=conversation_id,
+        new_query=new_query,
+    )
+
+
+@app.get("/debug/conversation/{conversation_id}")
+def debug_get_conversation(conversation_id: str):
+    return conversation_service.get_public_context(conversation_id)
+
+
+@app.delete("/debug/conversation/{conversation_id}")
+def debug_reset_conversation(conversation_id: str):
+    deleted = conversation_service.reset_conversation(conversation_id)
+
+    return {
+        "conversation_id": conversation_id,
+        "deleted": deleted,
+    }
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
