@@ -6,6 +6,12 @@ The frontend provides a clean chat interface where users can ask schedule questi
 
 > This frontend is part of an educational local demo. It is not affiliated with Serveis Ferroviaris de Mallorca (SFM), and the information shown may not match official real-time schedules.
 
+## Demo Preview
+
+<p align="center">
+  <img src="../docs/images/sfm-assistant-demo.png" alt="SFM Assistant frontend preview" width="850">
+</p>
+
 ---
 
 ## Table of Contents
