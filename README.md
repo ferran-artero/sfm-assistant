@@ -1,105 +1,83 @@
 # SFM Assistant
 
-Assistent intel·ligent de demostració per consultar horaris de tren i metro de Mallorca a partir de dades locals estructurades.
+Conversational assistant demo for checking train and metro schedules in Mallorca.
 
-El projecte combina un backend amb FastAPI, una interfície web amb React + Vite, una petita base de dades en JSON i integració amb Gemini per interpretar missatges i redactar respostes naturals en català.
+SFM Assistant is a full-stack web application that combines a React frontend, a FastAPI backend, local structured schedule data and Gemini-based natural language processing. The system allows users to ask train and metro schedule questions in natural Catalan and receive concise, human-readable answers.
 
----
-
-## Resum general
-
-SFM Assistant és una demo d’un chatbot capaç d’entendre consultes senzilles sobre trens i metro de Mallorca.
-
-L’usuari pot escriure preguntes com:
-
-`Vull anar d'Inca a Palma`
-
-`Quins trens hi ha d'Inca a Palma dematí?`
-
-`Vull arribar a Palma abans de les 9 des d'Inca`
-
-`Vull anar a Vilafranca`
-
-El sistema interpreta el missatge, valida les estacions, consulta horaris locals i genera una resposta en català.
-
-La IA no consulta directament els horaris. El backend és qui valida i cerca les dades. Gemini només ajuda a entendre el llenguatge natural i, quan és segur, a redactar la resposta final.
+> This is an educational and local demo project. It is not affiliated with Serveis Ferroviaris de Mallorca (SFM), and it does not use official real-time data.
 
 ---
 
-## Objectius del projecte
+## Overview
 
-Els objectius principals són:
+SFM Assistant is designed as a conversational interface for public transport schedule queries in Mallorca.
 
-* Crear una demo visual d’un assistent de trens i metro.
-* Respondre sempre en català.
-* Entendre consultes naturals de l’usuari.
-* Detectar origen, destinació, data, hora i franja horària.
-* Detectar pobles o llocs sense aturada ferroviària.
-* Mantenir context de conversa amb `conversation_id`.
-* Consultar horaris locals estructurats.
-* Evitar que Gemini inventi hores, estacions o trajectes.
-* Tenir fallback per regles i plantilles quan Gemini falla.
+Users can ask questions such as:
 
----
+* `Vull anar de Manacor a Palma`
+* `Quins trens hi ha d'Inca a Palma dematí?`
+* `Vull arribar a Palma abans de les 9 des d'Inca`
+* `Vull anar a Vilafranca`
+* `I demà dematí?`
+* `I un més tard?`
 
-## Funcionalitats principals
+The assistant interprets the message, extracts structured information, validates stations, handles conversational context, searches local schedule data and returns a response in Catalan.
 
-Actualment el projecte permet:
-
-* Consultar pròximes sortides.
-* Consultar trens dins una franja horària.
-* Cercar trens que arriben abans d’una hora.
-* Cercar trens que surten després d’una hora.
-* Detectar consultes incompletes i demanar aclariments.
-* Respondre a aclariments curts com `A Palma`, `Manacor` o `dematí`.
-* Detectar llocs coneguts sense tren, com Vilafranca o Alcúdia.
-* Mostrar informació de debug durant el desenvolupament.
-* Guardar el `conversation_id` al navegador.
+The language model does not search schedules directly. Schedule lookup is handled by the backend. Gemini is only used to interpret natural language and to convert verified backend data into a readable response.
 
 ---
 
-## Arquitectura general
+## Main Features
 
-El flux principal és:
+* Conversational train and metro schedule assistant.
+* Catalan-only user responses.
+* Natural language understanding with Gemini.
+* Rule-based fallback when Gemini is unavailable.
+* Local JSON schedule search.
+* Station and stop validation.
+* Detection of known places without train or metro service.
+* Support for incomplete queries and follow-up answers.
+* Context memory through `conversation_id`.
+* Support for relative follow-ups such as:
 
-Usuari
-↓
-Frontend React
-↓
-POST /chat
-↓
-Chat Service
-↓
-Intent Service
-
-* Gemini interpreta el missatge.
-* Fallback amb regles si Gemini falla.
-  ↓
-  Conversation Service
-* Manté el context.
-* Completa consultes pendents.
-  ↓
-  Station Service
-* Valida estacions.
-* Detecta pobles sense tren.
-* Corregeix typos simples.
-  ↓
-  Train Service
-* Consulta horaris locals en JSON.
-  ↓
-  Response Service
-* Gemini redacta quan és segur.
-* Template si fa falta.
-  ↓
-  Hallucination Guard
-* Bloqueja hores inventades.
-  ↓
-  Resposta final al frontend
+  * `I demà dematí?`
+  * `I un més tard?`
+  * `I des de Manacor?`
+* Date handling for today, tomorrow, weekdays and weekends.
+* Time-window handling for morning, midday, afternoon and evening.
+* Result lists limited to a small number of relevant options.
+* Hallucination guard to prevent Gemini from inventing times.
+* Clean local demo frontend with official-looking visual style and non-official demo notice.
 
 ---
 
-## Estructura del projecte
+## Tech Stack
 
+### Backend
+
+* Python
+* FastAPI
+* Uvicorn
+* Pydantic
+* Pydantic Settings
+* Google Gemini API
+* Local JSON data
+* `zoneinfo` / `tzdata`
+
+### Frontend
+
+* React
+* Vite
+* JavaScript
+* CSS
+* Fetch API
+* LocalStorage
+
+---
+
+## Project Structure
+
+```text
 sfm-assistant/
 
 ├── backend/
@@ -147,542 +125,586 @@ sfm-assistant/
 ├── .gitignore
 ├── README.md
 └── TODO.md
+```
 
 ---
 
-## Tecnologies utilitzades
+## How It Works
 
-### Backend
+The application follows a backend-controlled architecture.
 
-* Python
-* FastAPI
-* Uvicorn
-* Pydantic
-* Pydantic Settings
-* Google Gemini API
-* JSON com a base de dades local
-* `zoneinfo` / `tzdata` per gestionar la zona horària
+```text
+User
+↓
+React frontend
+↓
+POST /chat
+↓
+ChatService
+↓
+IntentService
+↓
+ConversationService
+↓
+StationService
+↓
+TrainService
+↓
+ResponseService
+↓
+HallucinationGuard
+↓
+Final response
+```
 
-### Frontend
+### 1. The user sends a message
 
-* React
-* Vite
-* JavaScript
-* CSS
-* LocalStorage
+The frontend sends the user message and the current `conversation_id` to the backend.
+
+### 2. The backend interprets the intent
+
+`IntentService` uses Gemini to extract structured information from the message. If Gemini fails, a rule-based parser is used as fallback.
+
+The system can detect:
+
+* greetings
+* thanks
+* goodbyes
+* train queries
+* out-of-domain messages
+* origin station
+* destination station
+* date
+* time
+* time window
+* query type
+* known places without train service
+
+### 3. The conversation context is completed
+
+`ConversationService` keeps temporary memory in RAM.
+
+It stores:
+
+* previous messages
+* pending query
+* last complete query
+* last results
+
+This allows conversations such as:
+
+```text
+User: Vull anar a Palma
+Bot: Des de quina estació vols sortir per anar a Palma Estació Intermodal?
+User: Des de Manacor
+Bot: Here are the next options from Manacor to Palma.
+```
+
+It also supports temporal follow-ups:
+
+```text
+User: Vull anar de Manacor a Inca
+Bot: Here are the next options.
+User: I demà dematí?
+Bot: Here are the options from Manacor to Inca tomorrow morning.
+```
+
+### 4. Stations and places are validated
+
+`StationService` validates whether a location is a valid train or metro stop.
+
+It can also detect known places without railway service, such as Vilafranca de Bonany or Alcúdia, so the assistant does not try to invent a train route.
+
+### 5. Local schedules are searched
+
+`TrainService` searches local structured schedule data stored in JSON.
+
+Supported query types include:
+
+* next departures
+* trains within a time window
+* departures after a specific time
+* arrivals before a specific time
+* departures from a station
+* arrivals to a station
+* later or earlier relative options
+
+### 6. A final response is generated
+
+`ResponseService` generates the final response in Catalan.
+
+If Gemini is available, it receives only verified backend data and converts it into readable text.
+
+If Gemini fails or returns unsafe information, the backend uses a safe template response.
+
+### 7. The hallucination guard validates the answer
+
+`HallucinationGuard` checks that Gemini has not introduced times that do not exist in the verified schedule results.
+
+If Gemini invents a time, the generated response is discarded and a template fallback is used.
 
 ---
 
-## Instal·lació ràpida
+## Example Queries
 
-### 1. Clonar el repositori
+### Direct route query
 
-`git clone https://github.com/ferran-artero/sfm-assistant.git`
+```text
+Vull anar de Manacor a Palma
+```
 
-`cd sfm-assistant`
+Expected behavior:
+
+* Detect origin: Manacor.
+* Detect destination: Palma.
+* Use today as default date.
+* Use current time as default time.
+* Return the next available options.
 
 ---
 
-## Executar el backend
+### Time-window query
 
-Entra dins el backend:
+```text
+Quins trens hi ha d'Inca a Palma dematí?
+```
 
-`cd backend`
+Expected behavior:
 
-Crea un entorn virtual:
+* Detect origin: Inca.
+* Detect destination: Palma.
+* Detect time window: morning.
+* Search trains within the morning range.
+* Return up to 3 options.
 
-`python -m venv .venv`
+---
 
-Activa l’entorn virtual.
+### Arrival-before query
 
-A Windows PowerShell:
+```text
+Vull arribar a Palma abans de les 9 des d'Inca
+```
 
-`.\.venv\Scripts\Activate.ps1`
+Expected behavior:
 
-A macOS/Linux:
+* Detect origin: Inca.
+* Detect destination: Palma.
+* Detect arrival limit: 09:00.
+* Return trains that arrive before that time.
 
-`source .venv/bin/activate`
+---
 
-Instal·la dependències:
+### Incomplete query
 
-`pip install -r requirements.txt`
+```text
+Vull anar a Palma
+```
 
-Crea el fitxer `.env` a partir de `.env.example`:
+Expected behavior:
 
-`cp .env.example .env`
+```text
+Des de quina estació vols sortir per anar a Palma Estació Intermodal?
+```
 
-A Windows PowerShell:
+Then:
 
-`Copy-Item .env.example .env`
+```text
+Des de Manacor
+```
 
-Edita `backend/.env` i afegeix la teva clau de Gemini:
+The assistant completes the pending query and searches Manacor → Palma.
 
+---
+
+### Known place without train service
+
+```text
+Vull anar a Vilafranca
+```
+
+Expected behavior:
+
+The assistant explains that Vilafranca de Bonany does not currently appear as a train or metro stop in the loaded demo data.
+
+---
+
+### Contextual follow-up
+
+```text
+I demà dematí?
+```
+
+Expected behavior:
+
+The assistant reuses the previous route and changes only the date and time window.
+
+---
+
+## Time Windows
+
+The assistant maps natural language expressions to internal time windows.
+
+| Internal value | Meaning                       | Time range    |
+| -------------- | ----------------------------- | ------------- |
+| `morning`      | dematí / matí                 | 06:00 - 12:00 |
+| `midday`       | migdia                        | 12:00 - 15:00 |
+| `afternoon`    | tarda / horabaixa / capvespre | 15:00 - 20:00 |
+| `evening`      | vespre / nit                  | 20:00 - 23:59 |
+
+---
+
+## Local Data
+
+The project currently uses local JSON files as demo data.
+
+### `stations.json`
+
+Contains valid train and metro stops, including:
+
+* stop ID
+* display name
+* official name
+* aliases
+* common typos
+* transport modes
+* related routes
+
+### `places_without_train.json`
+
+Contains known places in Mallorca that do not appear as train or metro stops in the loaded demo network.
+
+This is used to avoid incorrect route searches or hallucinated station names.
+
+### `schedules_sample.json`
+
+Contains local structured schedule data.
+
+It includes:
+
+* routes
+* service calendars
+* trips
+* stop times
+
+Each trip stores a full ordered list of stops, which allows the backend to search intermediate route segments.
+
+---
+
+## Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/ferran-artero/sfm-assistant.git
+cd sfm-assistant
+```
+
+---
+
+## Backend Setup
+
+### 1. Enter the backend folder
+
+```bash
+cd backend
+```
+
+### 2. Create a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+### 3. Activate the virtual environment
+
+Windows PowerShell:
+
+```bash
+.\.venv\Scripts\Activate.ps1
+```
+
+macOS / Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+### 4. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Create the environment file
+
+Windows PowerShell:
+
+```bash
+Copy-Item .env.example .env
+```
+
+macOS / Linux:
+
+```bash
+cp .env.example .env
+```
+
+### 6. Configure Gemini
+
+Edit `backend/.env`:
+
+```env
 APP_NAME=SFM Assistant
 ENVIRONMENT=development
 
 LLM_PROVIDER=gemini
-GEMINI_API_KEY=posa_aqui_la_teva_clau
+GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-3.1-flash-lite
 
 RESPONSE_LANGUAGE=ca
 USE_SAMPLE_DATA=true
 DEBUG=true
+```
 
-Executa el backend:
+### 7. Run the backend
 
-`uvicorn app.main:app --reload`
+```bash
+uvicorn app.main:app --reload
+```
 
-El backend quedarà disponible a:
+The backend will be available at:
 
-`http://127.0.0.1:8000`
+```text
+http://127.0.0.1:8000
+```
 
-Documentació automàtica:
+FastAPI documentation:
 
-`http://127.0.0.1:8000/docs`
+```text
+http://127.0.0.1:8000/docs
+```
 
----
+Health check:
 
-## Executar el frontend
-
-Obre una altra terminal i entra dins el frontend:
-
-`cd frontend`
-
-Instal·la dependències:
-
-`npm install`
-
-Executa el servidor de desenvolupament:
-
-`npm run dev`
-
-El frontend quedarà disponible normalment a:
-
-`http://localhost:5173`
+```text
+http://127.0.0.1:8000/health
+```
 
 ---
 
-## Ús bàsic
+## Frontend Setup
 
-Amb el backend i el frontend en marxa, obre:
+Open a new terminal from the project root.
 
-`http://localhost:5173`
+### 1. Enter the frontend folder
 
-Exemples de consultes:
+```bash
+cd frontend
+```
 
-`Hola`
+### 2. Install dependencies
 
-`Vull anar d'Inca a Palma`
+```bash
+npm install
+```
 
-`Quins trens hi ha d'Inca a Palma dematí?`
+### 3. Run the development server
 
-`Vull arribar a Palma abans de les 9 des d'Inca`
+```bash
+npm run dev
+```
 
-`Vull sortir d'Inca`
+The frontend will usually be available at:
 
-Després:
-
-`A Palma`
-
-`Vull anar a Vilafranca`
+```text
+http://localhost:5173
+```
 
 ---
 
-## API principal
+## API
 
 ### `POST /chat`
 
-Endpoint principal del chatbot.
+Main chatbot endpoint.
 
-Request:
+Example request:
 
+```json
 {
-"message": "Vull anar d'Inca a Palma",
-"conversation_id": null
+  "message": "Vull anar d'Inca a Palma",
+  "conversation_id": null
 }
+```
 
-Response:
+Example response:
 
+```json
 {
-"conversation_id": "uuid-de-la-conversa",
-"response": "Resposta final en català",
-"intent_source": "gemini",
-"response_source": "gemini",
-"debug": {
-"intent": "train_query",
-"intent_confidence": 0.9,
-"query": {
-"query_type": "next_departure",
-"origin_stop_id": "inca",
-"destination_stop_id": "palma",
-"date": null,
-"time": "now",
-"time_window": null,
-"departure_after": null,
-"arrival_before": null,
-"service_id": null
-},
-"results_count": 5,
-"response_source": "gemini",
-"llm_error": null
+  "conversation_id": "uuid",
+  "response": "Aquí tens les properes sortides d'Inca cap a Palma Estació Intermodal...",
+  "intent_source": "gemini",
+  "response_source": "gemini",
+  "debug": {
+    "intent": "train_query",
+    "intent_confidence": 0.9,
+    "query": {
+      "query_type": "next_departure",
+      "origin_stop_id": "inca",
+      "destination_stop_id": "palma",
+      "date": "today",
+      "time": "now",
+      "time_window": null,
+      "departure_after": null,
+      "arrival_before": null,
+      "service_id": null
+    },
+    "results_count": 3,
+    "response_source": "gemini",
+    "llm_error": null
+  }
 }
-}
+```
 
 ---
 
-## Camps principals de resposta
+## Debug Endpoints
 
-`conversation_id`
-Identificador de la conversa. El frontend el guarda al navegador.
+The backend includes several debug endpoints for development.
 
-`response`
-Resposta final que veu l’usuari.
+Examples:
 
-`intent_source`
-Indica com s’ha interpretat el missatge.
+```text
+GET /health
+GET /debug/llm
+GET /debug/intent?message=Vull anar d'Inca a Palma
+GET /debug/station/{query}
+GET /debug/trains/next
+GET /debug/trains/window
+GET /debug/trains/arrival-before
+GET /debug/trains/departure-after
+GET /debug/conversation/{conversation_id}
+GET /debug/hallucination/log
+```
 
-Possibles valors:
-
-* `gemini`
-* `rules`
-* `rules_fallback`
-* `pending_context`
-
-`response_source`
-Indica com s’ha generat la resposta final.
-
-Possibles valors:
-
-* `gemini`
-* `template`
-* `template_fallback`
-
-`debug`
-Informació útil durant el desenvolupament.
+These endpoints are useful during local development but are not intended as a public production API.
 
 ---
 
-## Endpoints útils de desenvolupament
+## Frontend Notes
 
-El backend inclou endpoints de debug per provar cada part del sistema.
+The frontend provides a clean chat interface with:
 
-`GET /health`
+* SFM-inspired visual identity.
+* User and assistant message bubbles.
+* Loading indicator.
+* Conversation reset button.
+* Persistent `conversation_id` in `localStorage`.
+* Non-official local demo notice.
 
-`GET /debug/llm`
-
-`GET /debug/intent?message=Vull anar d'Inca a Palma`
-
-`GET /debug/station/{query}`
-
-`GET /debug/trains/next`
-
-`GET /debug/trains/window`
-
-`GET /debug/trains/arrival-before`
-
-`GET /debug/trains/departure-after`
-
-`GET /debug/conversation/{conversation_id}`
-
-`GET /debug/hallucination/log`
-
-Aquests endpoints són útils durant el desenvolupament, però no estan pensats com a API pública final.
+The frontend intentionally hides development debug metadata from the user-facing interface.
 
 ---
 
-## Serveis principals del backend
+## Safety and Reliability
 
-### `ChatService`
+The project includes several safeguards:
 
-Orquestra el flux complet del chatbot.
+### Backend-owned data lookup
 
-Coordina:
+Gemini does not directly decide schedules. It only works with structured data provided by the backend.
 
-* Intent Service
-* Conversation Service
-* Station Service
-* Train Service
-* Response Service
-* Hallucination Guard
+### Rule-based fallback
 
-### `IntentService`
+If Gemini fails, the assistant can still interpret common train queries using deterministic rules.
 
-Interpreta el missatge de l’usuari.
+### Template fallback
 
-Pot usar Gemini i, si Gemini falla, torna a un sistema de regles simples.
+If Gemini fails while generating a response, the backend returns a safe template response.
 
-Detecta:
+### Hallucination guard
 
-* salutacions
-* agraïments
-* comiats
-* consultes de tren
-* origen i destinació
-* dates relatives
-* hores
-* franges horàries
-* llocs sense tren
+If Gemini mentions a time that does not exist in the verified backend results, the response is discarded.
 
-### `ConversationService`
+### Known places without train service
 
-Manté context temporal de conversa en memòria RAM.
-
-Guarda:
-
-* missatges
-* consulta pendent
-* darrera consulta
-* darrers resultats
-
-Serveix per resoldre converses com:
-
-Usuari: Vull sortir d'Inca
-Bot: Cap a quina estació vols anar?
-Usuari: A Palma
-Bot: Cerca trens d'Inca a Palma
-
-### `StationService`
-
-Valida estacions i llocs.
-
-Permet detectar:
-
-* estacions vàlides
-* àlies
-* errors simples d’escriptura
-* pobles coneguts sense tren
-
-### `TrainService`
-
-Consulta els horaris locals guardats en JSON.
-
-Sempre retorna resultats estructurats, no text final.
-
-### `ResponseService`
-
-Genera la resposta final.
-
-Pot usar Gemini per redactar respostes més naturals, però només a partir de dades verificades pel backend.
-
-Si Gemini falla o la resposta no és segura, usa una plantilla.
-
-### `HallucinationGuard`
-
-Valida que Gemini no inventi hores.
-
-Si Gemini menciona una hora que no apareix en els resultats verificats, la resposta es descarta i es torna a una plantilla segura.
+The assistant can detect known places that are not part of the loaded train or metro network and respond accordingly.
 
 ---
 
-## Dades locals
+## Limitations
 
-El projecte usa tres fitxers principals:
+This project is currently a local demo.
 
-`stations.json`
-Aturades vàlides, àlies, typos, línies i modes.
+Known limitations:
 
-`places_without_train.json`
-Pobles o llocs coneguts sense aturada ferroviària.
-
-`schedules_sample.json`
-Horaris locals estructurats per línies, calendaris i viatges.
-
-El format d’horaris és semblant a un GTFS simplificat:
-
-`routes`
-Línies disponibles.
-
-`service_calendars`
-Tipus de servei: laborable, cap de setmana, metro dissabte, etc.
-
-`trips`
-Viatges complets amb `stop_times`.
-
-Cada viatge guarda totes les aturades, no només origen i destinació. Això permet consultar trams intermedis.
+* It does not use an official real-time SFM API.
+* Schedule data is local and may not be up to date.
+* Conversation memory is stored in RAM and is lost when the backend restarts.
+* Public holidays are simplified.
+* Transfers are limited.
+* There is no persistent database.
+* There is no authentication.
+* Debug endpoints are available during development.
+* Gemini may fail because of quota limits, latency or malformed responses.
 
 ---
 
-## Prompts
+## Future Improvements
 
-El backend usa dos prompts:
+Potential improvements include:
 
-`intent_prompt.txt`
-Converteix el missatge de l’usuari en JSON estructurat.
-
-`response_prompt.txt`
-Redacta una resposta natural en català a partir de resultats verificats.
-
-Gemini no ha d’inventar horaris. Només pot treballar amb informació que ja li passa el backend.
-
----
-
-## Frontend
-
-El frontend és una interfície de xat simple.
-
-Inclou:
-
-* pantalla de conversa
-* missatges d’usuari i bot
-* botons d’exemple
-* estat de càrrega
-* botó per reiniciar conversa
-* guardat del `conversation_id` a `localStorage`
-* visualització de debug durant el desenvolupament
-
-Els colors principals estan inspirats en la identitat de SFM:
-
-`--sfm-blue: #002e6d;`
-
-`--sfm-green: #61a60e;`
+* Import official GTFS data.
+* Add full transfer support.
+* Model real public holidays.
+* Add SQLite or PostgreSQL persistence.
+* Add automated backend and frontend tests.
+* Add Docker support.
+* Add structured logging.
+* Add production mode with debug endpoints disabled.
+* Add a frontend environment variable for the backend API URL.
+* Add a result-card UI for schedule options.
+* Add deployment documentation.
 
 ---
 
-## Fallbacks
+## Documentation
 
-El sistema no depèn completament de Gemini.
+More detailed documentation is available in:
 
-### Fallback d’intenció
+```text
+backend/README.md
+frontend/README.md
+```
 
-Si Gemini falla interpretant el missatge:
-
-`intent_source = rules_fallback`
-
-El sistema intenta interpretar-lo amb regles simples.
-
-### Fallback de resposta
-
-Si Gemini falla redactant o inventa dades:
-
-`response_source = template_fallback`
-
-El sistema genera una resposta segura amb plantilla.
-
-### Template directe
-
-S’usa en casos controlats com:
-
-* salutacions
-* gràcies
-* adeu
-* fora de domini
-* aclariments
-* llocs sense tren
-* consultes sense resultats
+The root README gives a general overview of the project. The backend and frontend READMEs explain each part in more technical detail.
 
 ---
 
-## Limitacions actuals
+## Security
 
-Aquesta aplicació és una demo i no un sistema de producció.
+Never commit `.env` files or API keys.
 
-Limitacions conegudes:
+Use `.env.example` for placeholders only.
 
-* Les dades són locals i no provenen d’una API en temps real.
-* La memòria de conversa és temporal i es perd en reiniciar el servidor.
-* No hi ha base de dades persistent.
-* No hi ha autenticació.
-* La gestió de festius és simplificada.
-* Els transbords encara són limitats.
-* Gemini pot fallar per quota, latència o resposta incorrecta.
-* El debug encara és visible al frontend.
+If an API key is accidentally pushed to GitHub:
 
----
-
-## Errors freqüents
-
-### Error de zona horària a Windows
-
-Si apareix:
-
-`ZoneInfoNotFoundError: No time zone found with key Europe/Madrid`
-
-Instal·la `tzdata`:
-
-`pip install tzdata`
-
-També hauria d’estar inclòs dins `requirements.txt`.
-
-### Gemini retorna quota excedida
-
-Pot passar si s’esgota el límit gratuït del model configurat.
-
-Canvia el model dins `.env`, per exemple:
-
-GEMINI_MODEL=gemini-3.1-flash-lite
-
-Després reinicia el backend:
-
-`uvicorn app.main:app --reload`
-
-### El frontend no connecta amb el backend
-
-Comprova que el backend està actiu:
-
-`http://127.0.0.1:8000/health`
-
-I que el frontend apunta a:
-
-`http://127.0.0.1:8000/chat`
+1. Revoke the key.
+2. Generate a new one.
+3. Update the local `.env` file.
+4. Remove the exposed key from the repository.
+5. Commit and push the cleanup.
 
 ---
 
-## Roadmap
+## Author
 
-Possibles millores futures:
-
-* Afegir SQLite.
-* Importar horaris GTFS.
-* Millorar suport de transbords.
-* Afegir festius reals.
-* Separar model Gemini per intents i per resposta.
-* Afegir mode només-regles per no consumir quota.
-* Afegir tests automatitzats.
-* Afegir Docker.
-* Afegir logs estructurats.
-* Amagar el debug en mode producció.
-* Millorar les respostes curtes en context.
-* Afegir una vista de totes les opcions trobades.
-* Afegir panell d’administració per actualitzar horaris.
+Developed by Ferran Artero as a full-stack AI assistant demo for train and metro schedule queries in Mallorca.
 
 ---
 
-## Seguretat
+## Disclaimer
 
-No s’ha de pujar mai el fitxer `.env` al repositori.
+This project is an independent educational demo. It is not affiliated with, endorsed by or officially connected to Serveis Ferroviaris de Mallorca.
 
-El fitxer `.env.example` sí que es pot mantenir perquè només és una plantilla.
-
-Si una clau API s’ha pujat accidentalment a GitHub:
-
-1. Revoca la clau.
-2. Genera’n una de nova.
-3. Actualitza `backend/.env`.
-4. Elimina la clau del codi.
-5. Fes commit dels canvis.
-
----
-
-## Documentació específica
-
-Aquest README dona una visió general del projecte.
-
-Per a més detall:
-
-`backend/README.md`
-Arquitectura interna del backend, serveis, endpoints i dades.
-
-`frontend/README.md`
-Estructura del frontend, components, estils i funcionament de la interfície.
-
----
-
-## Autor
-
-Projecte desenvolupat per Ferran Artero com a demo d’un assistent intel·ligent per consultar horaris de tren i metro de Mallorca.
-
----
-
-## Nota
-
-Aquesta aplicació és una demo educativa i de desenvolupament. Les dades d’horaris carregades localment poden no correspondre sempre amb el servei real actual. Per a informació oficial i actualitzada, s’ha de consultar el servei oficial corresponent.
+The information returned by the assistant depends on locally loaded demo data and may not match the current official service. For official and up-to-date transport information, users should always consult the official transport provider.

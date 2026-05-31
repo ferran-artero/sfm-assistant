@@ -1,42 +1,98 @@
 # Frontend — SFM Assistant
 
-Frontend de l’assistent intel·ligent SFM Assistant.
+React frontend for SFM Assistant, a conversational demo application for checking train and metro schedules in Mallorca.
 
-Aquest frontend està desenvolupat amb React + Vite i ofereix una interfície de xat senzilla per consultar horaris de tren i metro de Mallorca. Es comunica amb el backend mitjançant l’endpoint `POST /chat`.
+The frontend provides a clean chat interface where users can ask schedule questions in Catalan. It communicates with the FastAPI backend through the `POST /chat` endpoint and displays the assistant response in a simple, user-friendly layout.
 
----
-
-## Resum
-
-El frontend permet a l’usuari interactuar amb el chatbot de manera visual.
-
-Funcionalitats principals:
-
-* Escriure missatges en una interfície de xat.
-* Enviar consultes al backend.
-* Mostrar respostes del bot.
-* Guardar el `conversation_id` al navegador.
-* Mantenir el context de conversa entre missatges.
-* Mostrar estat de càrrega mentre el backend respon.
-* Reiniciar la conversa.
-* Mostrar informació de debug durant el desenvolupament.
-* Usar els colors i el logo de SFM.
+> This frontend is part of an educational local demo. It is not affiliated with Serveis Ferroviaris de Mallorca (SFM), and the information shown may not match official real-time schedules.
 
 ---
 
-## Tecnologies utilitzades
+## Table of Contents
+
+* [Overview](#overview)
+* [Main Features](#main-features)
+* [Tech Stack](#tech-stack)
+* [Frontend Structure](#frontend-structure)
+* [How It Works](#how-it-works)
+* [Main Files](#main-files)
+* [Connection with the Backend](#connection-with-the-backend)
+* [Conversation State](#conversation-state)
+* [User Interface](#user-interface)
+* [Styling](#styling)
+* [Responsive Design](#responsive-design)
+* [Installation](#installation)
+* [Running the Frontend](#running-the-frontend)
+* [Available Scripts](#available-scripts)
+* [Testing the Interface](#testing-the-interface)
+* [Build for Production](#build-for-production)
+* [Common Issues](#common-issues)
+* [Known Limitations](#known-limitations)
+* [Future Improvements](#future-improvements)
+* [Relationship with the Backend](#relationship-with-the-backend)
+* [Disclaimer](#disclaimer)
+
+---
+
+## Overview
+
+The frontend is the user-facing part of SFM Assistant.
+
+It allows users to interact with the chatbot through a chat-style interface. The user writes a message, the frontend sends it to the backend, and the backend returns a final response in Catalan.
+
+Example user messages:
+
+```text
+Vull anar de Manacor a Palma
+```
+
+```text
+Quins trens hi ha d'Inca a Palma dematí?
+```
+
+```text
+Vull arribar a Palma abans de les 9 des d'Inca
+```
+
+```text
+Vull anar a Vilafranca
+```
+
+The frontend does not interpret transport data by itself. It only manages the interface, sends requests, keeps the `conversation_id` and displays the backend response.
+
+---
+
+## Main Features
+
+* Clean chat interface.
+* User and assistant message bubbles.
+* Catalan-first user experience.
+* Connection with the FastAPI backend.
+* Persistent `conversation_id` using `localStorage`.
+* Conversation reset button.
+* Loading animation while the backend responds.
+* Basic frontend error handling.
+* SFM-inspired visual identity.
+* Non-official local demo notice.
+* Responsive layout for smaller screens.
+* Hidden technical metadata in the user-facing interface.
+
+---
+
+## Tech Stack
 
 * React
 * Vite
 * JavaScript
 * CSS
-* LocalStorage
 * Fetch API
+* LocalStorage
 
 ---
 
-## Estructura del frontend
+## Frontend Structure
 
+```text
 frontend/
 
 ├── public/
@@ -50,681 +106,726 @@ frontend/
 ├── package.json
 ├── vite.config.js
 └── README.md
+```
 
 ---
 
-## Fitxers principals
+## How It Works
 
-### `src/App.jsx`
+The frontend follows a simple request-response flow.
 
-Conté la lògica principal del frontend.
-
-Responsabilitats:
-
-* mantenir l’estat dels missatges
-* enviar missatges al backend
-* guardar i recuperar el `conversation_id`
-* mostrar respostes del bot
-* mostrar estat de càrrega
-* reiniciar la conversa
-* mostrar informació de debug
-
----
-
-### `src/App.css`
-
-Conté tots els estils de la interfície.
-
-Defineix:
-
-* colors principals
-* layout general
-* targeta de xat
-* capçalera
-* botons d’exemple
-* bombolles de missatge
-* formulari d’enviament
-* estat de càrrega
-* panell de debug
-* disseny responsive
-
----
-
-### `src/main.jsx`
-
-Punt d’entrada de React.
-
-Renderitza el component principal `App`.
-
----
-
-### `public/SFM_Color.svg`
-
-Logo de SFM utilitzat a la capçalera de l’aplicació.
-
----
-
-## Instal·lació
-
-Des de la carpeta del projecte:
-
-`cd frontend`
-
-Instal·la les dependències:
-
-`npm install`
-
----
-
-## Executar el frontend
-
-Per iniciar el servidor de desenvolupament:
-
-`npm run dev`
-
-Normalment Vite obrirà el frontend a:
-
-`http://localhost:5173`
-
-També pot aparèixer com:
-
-`http://127.0.0.1:5173`
-
----
-
-## Requisit important
-
-Abans d’usar el frontend, el backend ha d’estar en marxa.
-
-Des de la carpeta `backend/`:
-
-`uvicorn app.main:app --reload`
-
-El backend ha d’estar disponible a:
-
-`http://127.0.0.1:8000`
-
-Pots comprovar-ho obrint:
-
-`http://127.0.0.1:8000/health`
-
----
-
-## Connexió amb el backend
-
-El frontend envia els missatges a:
-
-`http://127.0.0.1:8000/chat`
-
-Això està definit dins `src/App.jsx`:
-
-`const API_URL = "http://127.0.0.1:8000/chat";`
-
-Durant el desenvolupament local, aquesta URL és suficient.
-
-Si el backend es desplega en un servidor o canvia de port, s’haurà d’actualitzar aquesta constant o substituir-la per una variable d’entorn.
-
----
-
-## Flux de funcionament
-
-El flux principal del frontend és:
-
-Usuari escriu un missatge
+```text
+User writes a message
 ↓
-El frontend afegeix el missatge a la conversa
+Frontend adds the user message to the chat
 ↓
-El frontend envia `message` i `conversation_id` a `POST /chat`
+Frontend sends message + conversation_id to POST /chat
 ↓
-El backend interpreta i respon
+Backend processes the query
 ↓
-El frontend guarda el nou `conversation_id` si encara no existia
+Backend returns a response
 ↓
-El frontend mostra la resposta del bot
+Frontend stores the conversation_id
 ↓
-El frontend actualitza el panell de debug
+Frontend displays the assistant response
+```
+
+The backend is responsible for:
+
+* understanding the message
+* validating stations
+* maintaining conversational context
+* searching schedules
+* generating the final response
+
+The frontend is responsible for:
+
+* displaying the interface
+* handling user input
+* calling the API
+* showing loading and error states
+* storing the `conversation_id`
 
 ---
 
-## Request enviat al backend
+## Main Files
 
-Quan l’usuari envia un missatge, el frontend fa una petició `POST /chat`.
+## `src/App.jsx`
 
-Exemple:
+Main React component.
 
+Responsibilities:
+
+* Store chat messages in component state.
+* Store the current input value.
+* Send requests to the backend.
+* Receive and display backend responses.
+* Store and reuse `conversation_id`.
+* Reset the conversation.
+* Display loading state.
+* Display connection errors.
+
+---
+
+## `src/App.css`
+
+Main stylesheet.
+
+Defines:
+
+* app layout
+* chat card
+* header
+* SFM logo sizing
+* message bubbles
+* input form
+* send button
+* loading animation
+* non-official demo notice
+* responsive behavior
+
+---
+
+## `src/main.jsx`
+
+React entry point.
+
+It renders the main `App` component into the DOM.
+
+---
+
+## `public/SFM_Color.svg`
+
+SFM logo used in the application header.
+
+The project uses the logo for visual context in a local educational demo. The application clearly states that it is not an official SFM product.
+
+---
+
+## Connection with the Backend
+
+The frontend sends messages to the backend endpoint:
+
+```text
+http://127.0.0.1:8000/chat
+```
+
+This is currently defined in `src/App.jsx` as a local development URL.
+
+A typical request looks like this:
+
+```json
 {
-"message": "Vull anar d'Inca a Palma",
-"conversation_id": null
+  "message": "Vull anar d'Inca a Palma",
+  "conversation_id": null
 }
+```
 
-Si ja hi ha una conversa guardada, s’envia així:
+If a conversation already exists, the frontend sends the stored `conversation_id`:
 
+```json
 {
-"message": "A Palma",
-"conversation_id": "uuid-de-la-conversa"
+  "message": "A Palma",
+  "conversation_id": "existing-conversation-id"
 }
+```
 
----
+A typical backend response looks like this:
 
-## Resposta esperada del backend
-
-El backend retorna una resposta amb aquest format:
-
+```json
 {
-"conversation_id": "uuid-de-la-conversa",
-"response": "Resposta final del bot",
-"intent_source": "gemini",
-"response_source": "gemini",
-"debug": {
-"intent": "train_query",
-"results_count": 5
+  "conversation_id": "uuid",
+  "response": "Aquí tens les properes sortides d'Inca cap a Palma Estació Intermodal...",
+  "intent_source": "gemini",
+  "response_source": "gemini",
+  "debug": {
+    "intent": "train_query",
+    "results_count": 3
+  }
 }
-}
+```
 
-El frontend mostra principalment el camp:
+The frontend displays only the user-facing `response`.
 
-`response`
-
-I usa aquests camps per debug:
-
-* `intent_source`
-* `response_source`
-* `debug`
+Technical metadata such as `intent_source`, `response_source` and `debug` may still be returned by the backend, but it is not shown in the clean user interface.
 
 ---
 
-## Gestió del `conversation_id`
+## Conversation State
 
-El frontend guarda el `conversation_id` dins `localStorage`.
+The frontend stores the backend `conversation_id` in `localStorage`.
 
-Clau utilitzada:
+Storage key:
 
-`sfm_conversation_id`
+```text
+sfm_conversation_id
+```
 
-Això permet mantenir el context de conversa encara que l’usuari enviï diversos missatges seguits.
+This allows the backend to maintain context across multiple user messages.
 
-Exemple:
+Example:
 
-Usuari:
+```text
+User: Vull anar a Palma
+Bot: Des de quina estació vols sortir per anar a Palma Estació Intermodal?
+User: Des de Manacor
+Bot: Shows Manacor → Palma options.
+```
 
-`Vull sortir d'Inca`
-
-Bot:
-
-`Cap a quina estació vols anar des de inca?`
-
-Usuari:
-
-`A Palma`
-
-El frontend envia el mateix `conversation_id`, i el backend pot completar la consulta com:
-
-`Inca → Palma`
+The frontend sends the same `conversation_id` with each request, allowing the backend to complete the pending query.
 
 ---
 
-## Reiniciar conversa
+## Resetting the Conversation
 
-El botó `Reiniciar conversa` fa tres coses:
+The `Reiniciar conversa` button:
 
-* elimina el `conversation_id` de `localStorage`
-* buida els missatges anteriors
-* torna a mostrar el missatge inicial del bot
+* removes the stored `conversation_id`
+* clears the visible chat messages
+* restores the initial assistant greeting
+* starts a new conversation on the next request
 
-Això crea una conversa nova a la pròxima consulta.
-
----
-
-## Missatge inicial
-
-Quan s’obre l’aplicació, es mostra aquest missatge inicial:
-
-`Hola! Som l’assistent de SFM. Puc ajudar-te a consultar horaris de tren i metro de Mallorca.`
-
-Aquest missatge no ve del backend. És un missatge inicial definit al frontend.
+This is useful when the user wants to start a completely new query flow.
 
 ---
 
-## Botons d’exemple
+## User Interface
 
-El frontend inclou botons per provar consultes ràpides:
+The interface is designed as a centered chat card.
 
-* `Inca → Palma`
-* `Dematí`
-* `Abans de les 9`
-* `Poble sense tren`
+It includes:
 
-Aquests botons no envien directament el missatge. Només omplen el camp de text perquè l’usuari pugui enviar-lo.
+* header with SFM logo and application title
+* subtitle explaining the purpose of the assistant
+* reset conversation button
+* scrollable message area
+* input field
+* send button
+* loading indicator
+* non-official demo notice
 
----
-
-## Estat de càrrega
-
-Quan l’usuari envia un missatge, el frontend activa `loading`.
-
-Durant aquest estat:
-
-* es desactiva l’input
-* es desactiva el botó d’enviar
-* es mostra una animació amb punts
-* el botó mostra `Cercant...`
-
-Quan arriba la resposta o hi ha un error, `loading` torna a `false`.
+The current UI intentionally avoids showing internal debug labels or development metadata to the user.
 
 ---
 
-## Gestió d’errors
+## Initial Message
 
-Si el frontend no pot connectar amb el backend, mostra aquest missatge:
+When the app loads, it displays an initial assistant message:
 
-`Ara mateix no puc connectar amb el servidor. Comprova que el backend està en marxa.`
+```text
+Hola! Som l’assistent de SFM. Puc ajudar-te a consultar horaris de tren i metro de Mallorca.
+```
 
-Aquest error pot aparèixer si:
-
-* el backend no està executant-se
-* el port del backend és diferent
-* hi ha un problema de CORS
-* l’endpoint `/chat` ha fallat
-* el backend ha retornat un error HTTP
+This message is defined in the frontend and is shown before the user sends the first request.
 
 ---
 
-## Debug al frontend
+## Loading State
 
-Durant el desenvolupament, el frontend mostra un petit panell de debug.
+When a message is being sent:
 
-Aquest panell mostra:
+* the input is disabled
+* the send button is disabled
+* a small animated loading indicator is displayed
+* the user cannot send empty messages
 
-* identificador curt de conversa
-* origen de la interpretació del missatge
-* origen de la resposta final
-* possibles errors de connexió
+If the backend returns successfully, the assistant response is added to the chat.
 
-Exemples:
-
-`intent: gemini`
-
-`intent: rules_fallback`
-
-`resposta: gemini`
-
-`resposta: template`
-
-`resposta: template_fallback`
+If the request fails, the frontend shows a user-friendly error message.
 
 ---
 
-## Significat dels valors de debug
+## Error Handling
 
-### `intent_source`
+If the frontend cannot connect to the backend, it displays:
 
-Indica com s’ha interpretat el missatge.
+```text
+Ara mateix no puc connectar amb el servidor. Comprova que el backend està en marxa.
+```
 
-Valors possibles:
+Common causes:
 
-* `gemini`
-* `rules`
-* `rules_fallback`
-* `pending_context`
-
-### `response_source`
-
-Indica com s’ha generat la resposta final.
-
-Valors possibles:
-
-* `gemini`
-* `template`
-* `template_fallback`
-
-### `template`
-
-Vol dir que el backend ha generat una resposta segura amb plantilla.
-
-S’usa en casos com:
-
-* salutació
-* gràcies
-* adeu
-* fora de domini
-* aclariment
-* poble sense tren
-* consulta sense resultats
-
-### `template_fallback`
-
-Vol dir que el backend ha intentat usar Gemini per redactar, però Gemini ha fallat o ha generat una resposta no segura.
-
-En aquest cas, el backend torna a una resposta segura amb plantilla.
+* backend is not running
+* backend is running on a different port
+* CORS configuration issue
+* `/chat` endpoint returned an error
+* network error
+* invalid backend URL
 
 ---
 
-## Estils i identitat visual
+## Styling
 
-El frontend utilitza colors inspirats en SFM.
+The visual identity is inspired by SFM colors.
 
-Colors principals:
+Main CSS variables:
 
-`--sfm-blue: #002e6d;`
+```css
+--sfm-blue: #002e6d;
+--sfm-green: #61a60e;
+--sfm-blue-soft: #e9f0fa;
+--sfm-green-soft: #eef7e7;
+--text-main: #14213d;
+--text-muted: #65758b;
+--border: #d9e2ef;
+--surface: #ffffff;
+--background: #f4f7fb;
+```
 
-`--sfm-green: #61a60e;`
+The design uses:
 
-Altres colors utilitzats:
-
-`--sfm-blue-soft: #e9f0fa;`
-
-`--sfm-green-soft: #eef7e7;`
-
-`--background: #f4f7fb;`
-
-`--surface: #ffffff;`
-
-La interfície està pensada com una targeta central de xat amb:
-
-* capçalera amb logo
-* botons d’exemple
-* zona de missatges
-* formulari d’entrada
-* panell de debug
-
----
-
-## Responsive design
-
-El CSS inclou adaptació per pantalles petites.
-
-En mòbil:
-
-* la targeta ocupa tota la pantalla
-* el formulari passa a disposició vertical
-* el botó d’enviar ocupa tota l’amplada
-* el logo es redueix
-* els marges laterals es fan més petits
+* rounded chat container
+* soft shadows
+* white message bubbles for the assistant
+* dark blue message bubbles for the user
+* green send button
+* subtle radial background
+* compact loading dots
+* centered non-official demo notice
 
 ---
 
-## Com provar el frontend
+## Responsive Design
 
-Amb backend i frontend en marxa, obre:
+The CSS includes responsive behavior for smaller screens.
 
-`http://localhost:5173`
+On mobile:
 
-Prova aquestes consultes:
+* the chat card takes the full viewport height
+* border radius is removed
+* header layout becomes vertical
+* logo is reduced
+* horizontal padding is reduced
+* the form can stack vertically
+* message bubbles use more available width
 
-### Salutació
-
-`Hola`
-
-Resposta esperada:
-
-El bot saluda i explica que pot ajudar amb horaris de tren i metro.
-
----
-
-### Consulta directa
-
-`Vull anar d'Inca a Palma`
-
-Resposta esperada:
-
-El bot cerca pròximes opcions d’Inca a Palma.
+This keeps the interface usable on both desktop and mobile screens.
 
 ---
 
-### Consulta amb franja
+## Installation
 
-`Quins trens hi ha d'Inca a Palma dematí?`
+From the project root:
 
-Resposta esperada:
+```bash
+cd frontend
+```
 
-El bot mostra opcions dins la franja del dematí.
+Install dependencies:
 
----
-
-### Consulta amb hora límit
-
-`Vull arribar a Palma abans de les 9 des d'Inca`
-
-Resposta esperada:
-
-El bot mostra trens que arriben abans de les 09:00.
+```bash
+npm install
+```
 
 ---
 
-### Consulta incompleta
+## Running the Frontend
 
-`Vull sortir d'Inca`
+Start the development server:
 
-Resposta esperada:
+```bash
+npm run dev
+```
 
-El bot demana la destinació.
+The app will usually be available at:
 
-Després escriu:
+```text
+http://localhost:5173
+```
 
-`A Palma`
+or:
 
-Resposta esperada:
+```text
+http://127.0.0.1:5173
+```
 
-El bot completa la consulta i cerca trens d’Inca a Palma.
+The backend must also be running.
 
----
+From the `backend/` folder:
 
-### Poble sense tren
+```bash
+uvicorn app.main:app --reload
+```
 
-`Vull anar a Vilafranca`
+Backend URL:
 
-Resposta esperada:
+```text
+http://127.0.0.1:8000
+```
 
-El bot indica que Vilafranca de Bonany no apareix com a aturada dins la xarxa carregada.
+Health check:
 
----
-
-### Fora de domini
-
-`Quin temps farà demà?`
-
-Resposta esperada:
-
-El bot indica que només pot ajudar amb consultes de tren i metro de Mallorca.
-
----
-
-## Scripts disponibles
-
-### Instal·lar dependències
-
-`npm install`
-
-### Executar en mode desenvolupament
-
-`npm run dev`
-
-### Generar build de producció
-
-`npm run build`
-
-### Previsualitzar build
-
-`npm run preview`
+```text
+http://127.0.0.1:8000/health
+```
 
 ---
 
-## Build de producció
+## Available Scripts
 
-Per generar una versió de producció:
+## `npm install`
 
-`npm run build`
+Installs project dependencies.
 
-Això crearà una carpeta:
+```bash
+npm install
+```
 
-`dist/`
+---
 
-La carpeta `dist/` es pot desplegar en serveis com:
+## `npm run dev`
+
+Starts the Vite development server.
+
+```bash
+npm run dev
+```
+
+---
+
+## `npm run build`
+
+Builds the frontend for production.
+
+```bash
+npm run build
+```
+
+The output is generated in:
+
+```text
+dist/
+```
+
+---
+
+## `npm run preview`
+
+Previews the production build locally.
+
+```bash
+npm run preview
+```
+
+---
+
+## Testing the Interface
+
+With both backend and frontend running, open:
+
+```text
+http://localhost:5173
+```
+
+Recommended manual tests:
+
+### Greeting
+
+```text
+Hola
+```
+
+Expected behavior:
+
+The assistant returns a greeting in Catalan.
+
+---
+
+### Direct route query
+
+```text
+Vull anar d'Inca a Palma
+```
+
+Expected behavior:
+
+The assistant returns the next available train options.
+
+---
+
+### Time-window query
+
+```text
+Quins trens hi ha d'Inca a Palma dematí?
+```
+
+Expected behavior:
+
+The assistant returns options within the morning time window.
+
+---
+
+### Arrival-before query
+
+```text
+Vull arribar a Palma abans de les 9 des d'Inca
+```
+
+Expected behavior:
+
+The assistant returns trains arriving before 09:00.
+
+---
+
+### Incomplete query
+
+```text
+Vull anar a Palma
+```
+
+Expected behavior:
+
+The assistant asks for the origin station.
+
+Then send:
+
+```text
+Des de Manacor
+```
+
+Expected behavior:
+
+The assistant completes the pending query and shows Manacor → Palma options.
+
+---
+
+### Known place without train service
+
+```text
+Vull anar a Vilafranca
+```
+
+Expected behavior:
+
+The assistant explains that Vilafranca de Bonany does not currently appear as a train or metro stop in the loaded demo data.
+
+---
+
+### Contextual follow-up
+
+First:
+
+```text
+Vull anar de Manacor a Inca
+```
+
+Then:
+
+```text
+I demà dematí?
+```
+
+Expected behavior:
+
+The backend reuses the previous route and changes only the date and time window.
+
+---
+
+### Out-of-domain query
+
+```text
+Quin temps farà demà?
+```
+
+Expected behavior:
+
+The assistant explains that it can only help with train and metro schedule queries.
+
+---
+
+## Build for Production
+
+Generate a production build:
+
+```bash
+npm run build
+```
+
+This creates:
+
+```text
+dist/
+```
+
+The generated files can be deployed to static hosting platforms such as:
 
 * Vercel
 * Netlify
 * GitHub Pages
-* servidor propi
-* qualsevol hosting d’arxius estàtics
+* Cloudflare Pages
+* a custom static server
+
+The deployed frontend must point to the correct backend URL.
 
 ---
 
-## Variables i configuració futura
+## Configuration Notes
 
-Actualment la URL del backend està definida directament a `App.jsx`.
+At the moment, the backend API URL is defined directly in `App.jsx`.
 
-Per una versió més neta, es podria crear un fitxer `.env` del frontend amb:
+For a more scalable setup, a future improvement would be to use a Vite environment variable:
 
-`VITE_API_URL=http://127.0.0.1:8000/chat`
+```env
+VITE_API_URL=http://127.0.0.1:8000/chat
+```
 
-I dins `App.jsx` usar:
+Then use it in React:
 
-`const API_URL = import.meta.env.VITE_API_URL;`
+```js
+const API_URL = import.meta.env.VITE_API_URL;
+```
 
-Això facilitaria canviar entre desenvolupament i producció.
-
----
-
-## Problemes freqüents
-
-### El frontend no obre
-
-Comprova que has instal·lat dependències:
-
-`npm install`
-
-I executa:
-
-`npm run dev`
+This would make it easier to switch between local development and production deployments.
 
 ---
 
-### El frontend no connecta amb el backend
+## Common Issues
 
-Comprova que el backend està actiu:
+## Frontend does not start
 
-`http://127.0.0.1:8000/health`
+Make sure dependencies are installed:
 
-També comprova que `API_URL` dins `App.jsx` sigui:
+```bash
+npm install
+```
 
-`http://127.0.0.1:8000/chat`
+Then run:
 
----
-
-### Error de CORS
-
-El backend ha de permetre l’origen del frontend.
-
-Durant desenvolupament, el backend permet:
-
-`http://localhost:5173`
-
-`http://127.0.0.1:5173`
-
-Si uses un altre port o domini, s’ha d’afegir a la configuració CORS del backend.
+```bash
+npm run dev
+```
 
 ---
 
-### El bot no recorda la conversa
+## Frontend cannot connect to backend
 
-Comprova que el navegador no estigui bloquejant `localStorage`.
+Check that the backend is running:
 
-També pots mirar si existeix aquesta clau:
+```text
+http://127.0.0.1:8000/health
+```
 
-`sfm_conversation_id`
+Also check that the frontend API URL points to:
 
-Si vols començar de zero, prem el botó:
-
-`Reiniciar conversa`
-
----
-
-### El bot respon amb fallback
-
-Si el frontend mostra:
-
-`resposta: template_fallback`
-
-Vol dir que el backend ha intentat usar Gemini per redactar, però ha tornat a una plantilla segura.
-
-Això no és un error del frontend. S’ha de revisar el backend, la quota de Gemini o el `HallucinationGuard`.
+```text
+http://127.0.0.1:8000/chat
+```
 
 ---
 
-## Limitacions actuals
+## CORS error
 
-El frontend és una demo senzilla.
+The backend must allow the frontend origin.
 
-Limitacions actuals:
+During local development, typical frontend origins are:
 
-* No hi ha login.
-* No hi ha historial persistent de converses.
-* Només es guarda el `conversation_id`, no tots els missatges.
-* Si es recarrega la pàgina, es manté el `conversation_id`, però no es recuperen els missatges antics.
-* El panell de debug és visible a la interfície.
-* La URL del backend està hardcoded.
-* No hi ha tests frontend.
-* No hi ha mode producció separat.
+```text
+http://localhost:5173
+http://127.0.0.1:5173
+```
+
+If the frontend runs on a different port or domain, the backend CORS configuration must be updated.
 
 ---
 
-## Millores futures
+## Conversation context is not preserved
 
-Possibles millores:
+Check that the browser is not blocking `localStorage`.
 
-* Crear variable `VITE_API_URL`.
-* Afegir mode producció sense debug visible.
-* Guardar historial de missatges a `localStorage`.
-* Afegir botó per mostrar/ocultar debug.
-* Afegir vista de resultats en targetes.
-* Afegir icones per tren i metro.
-* Afegir selector d’idioma en el futur.
-* Afegir tests amb Vitest o React Testing Library.
-* Afegir millor accessibilitat.
-* Afegir animacions més suaus.
-* Afegir desplegament a Vercel o Netlify.
-* Afegir suport per tema clar/fosc.
+The frontend stores the conversation ID under:
+
+```text
+sfm_conversation_id
+```
+
+Press `Reiniciar conversa` to clear the current conversation and start a new one.
 
 ---
 
-## Desenvolupament recomanat
+## Backend returns a fallback response
 
-Flux recomanat de treball:
+Fallback responses are not a frontend issue.
 
-1. Arrencar el backend.
-2. Comprovar `http://127.0.0.1:8000/health`.
-3. Arrencar el frontend.
-4. Obrir `http://localhost:5173`.
-5. Provar una salutació.
-6. Provar una consulta completa.
-7. Provar una consulta incompleta.
-8. Revisar el panell de debug.
-9. Si hi ha error, mirar la terminal del backend.
+They usually mean that:
 
----
+* Gemini was unavailable
+* Gemini quota was exceeded
+* Gemini returned invalid JSON
+* the hallucination guard rejected the generated response
+* the backend intentionally used a safe template
 
-## Relació amb el backend
-
-Aquest frontend depèn del backend de SFM Assistant.
-
-La documentació detallada del backend es troba a:
-
-`../backend/README.md`
-
-El backend és responsable de:
-
-* interpretar el missatge
-* mantenir context
-* consultar dades
-* generar resposta
-* validar anti-al·lucinacions
-
-El frontend només mostra la conversa i envia/reb missatges.
+Check the backend terminal or debug endpoints for more details.
 
 ---
 
-## Nota final
+## Known Limitations
 
-Aquest frontend forma part de SFM Assistant, una demo educativa i de desenvolupament per consultar horaris de tren i metro de Mallorca.
+Current frontend limitations:
 
-La interfície està pensada per ser simple, clara i útil per demostrar el funcionament del chatbot.
+* No login.
+* No persistent chat history.
+* Only the `conversation_id` is stored locally.
+* Reloading the page keeps the backend context ID but does not restore old visible messages.
+* Backend URL is currently hardcoded.
+* No frontend test suite yet.
+* No separate production configuration yet.
+* No deployment-specific environment setup yet.
+* No advanced result cards or timetable view yet.
+
+---
+
+## Future Improvements
+
+Potential improvements:
+
+* Move backend URL to `VITE_API_URL`.
+* Add production and development environment files.
+* Store visible chat history in `localStorage`.
+* Add a clear “new chat” confirmation.
+* Add result cards for train options.
+* Add icons for train and metro.
+* Add better accessibility labels.
+* Add keyboard shortcuts.
+* Add automated tests with Vitest and React Testing Library.
+* Add deployment documentation.
+* Add dark mode.
+* Add a compact mobile-first layout variant.
+* Add optional debug mode controlled by environment variable.
+
+---
+
+## Relationship with the Backend
+
+This frontend depends on the SFM Assistant backend.
+
+Backend documentation:
+
+```text
+../backend/README.md
+```
+
+The backend handles:
+
+* natural language interpretation
+* conversation memory
+* station validation
+* schedule search
+* Gemini integration
+* response generation
+* hallucination protection
+
+The frontend handles:
+
+* user interaction
+* visual chat layout
+* API calls
+* loading state
+* local `conversation_id` storage
+
+---
+
+## Disclaimer
+
+This frontend is part of an independent educational demo. It is not affiliated with, endorsed by or officially connected to Serveis Ferroviaris de Mallorca.
+
+The interface may display locally loaded demo schedule data that does not match the current official service. For official and up-to-date transport information, users should always consult the official transport provider.
