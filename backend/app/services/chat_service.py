@@ -22,7 +22,7 @@ TIME_WINDOWS = {
     "evening": ("20:00", "23:59"),
 }
 
-DEFAULT_LIMIT = 5
+DEFAULT_LIMIT = 3
 TIMEZONE = ZoneInfo("Europe/Madrid")
 logger = logging.getLogger("sfm.chat")
 
@@ -66,6 +66,47 @@ class ChatService:
             intent_result.get("query"),
         )
 
+        known_place_guard = self._detect_known_places_without_train_with_rules(
+            conversation_id=active_conversation_id,
+            message=message,
+            current_intent=intent,
+        )
+
+        if known_place_guard:
+            intent_result = {
+                **intent_result,
+                "intent": "train_query",
+                "confidence": 0.95,
+                "query": known_place_guard.get("query"),
+                "detected_locations": known_place_guard.get("detected_locations", []),
+                "known_places_without_train": known_place_guard["known_places_without_train"],
+                "source": "rules_place_guard",
+                "reason": "S'ha detectat un lloc conegut sense tren amb regles deterministes.",
+            }
+
+            intent = "train_query"
+
+        contextual_followup = self._try_build_contextual_followup_query(
+            conversation_id=active_conversation_id,
+            message=message,
+            intent=intent,
+        )
+
+        if contextual_followup:
+            intent_result = {
+                "intent": "train_query",
+                "confidence": 0.95,
+                "message": message,
+                "normalized_message": message.lower().strip(),
+                "query": contextual_followup["query"],
+                "detected_locations": [],
+                "known_places_without_train": [],
+                "source": contextual_followup["source"],
+                "reason": contextual_followup["reason"],
+            }
+
+            intent = "train_query"
+
         # 1. Salutació, gràcies, adeu, fora de domini, empty...
         if intent != "train_query":
             response_data = response_service.build_simple_response(intent_result)
@@ -103,6 +144,18 @@ class ChatService:
             )
 
         query = intent_result.get("query") or {}
+
+        query = self._adapt_query_for_pending_completion(
+            conversation_id=active_conversation_id,
+            query=query,
+        )
+
+        query = self._merge_with_last_query_if_temporal_followup(
+            conversation_id=active_conversation_id,
+            query=query,
+        )
+
+        query = self._normalize_query_type_for_time_window(query)
 
         # 3. Consultes relatives: "un més tard", "un abans"...
         if query.get("query_type") in ["later", "earlier"]:
@@ -164,36 +217,6 @@ class ChatService:
             response_data.get("llm_error"),
         )
 
-        pending_query = conversation_service.get_pending_query(active_conversation_id)
-
-        if intent != "train_query" and pending_query:
-            pending_followup_query = self._try_build_query_from_pending_followup(
-                message=message,
-                pending_query=pending_query,
-            )
-
-            if pending_followup_query:
-                logger.info(
-                    "Pending follow-up resolved | conversation_id=%s | pending_query=%s | followup_query=%s",
-                    active_conversation_id,
-                    pending_query,
-                    pending_followup_query,
-                )
-
-                intent_result = {
-                    "intent": "train_query",
-                    "confidence": 0.95,
-                    "message": message,
-                    "normalized_message": message.lower().strip(),
-                    "query": pending_followup_query,
-                    "detected_locations": [],
-                    "known_places_without_train": [],
-                    "source": "pending_context",
-                    "reason": "Resposta curta usada per completar una consulta pendent.",
-                }
-
-                intent = "train_query"
-
         # 7. Resposta final amb debug
         return self._finalize_response(
             conversation_id=active_conversation_id,
@@ -210,6 +233,64 @@ class ChatService:
             },
         )
 
+    def _detect_known_places_without_train_with_rules(
+        self,
+        conversation_id: str,
+        message: str,
+        current_intent: str | None,
+    ) -> dict[str, Any] | None:
+        """
+        Detecta llocs coneguts sense tren amb regles deterministes.
+
+        Això evita dependre només de Gemini en casos com:
+        - "des de Vilafranca"
+        - "vull anar a Vilafranca"
+        - "de Vilafranca a Palma"
+
+        Especialment important quan hi ha una pending_query oberta.
+        """
+        rules_result = intent_service.analyze_message_with_rules(message)
+        known_places = rules_result.get("known_places_without_train", [])
+
+        if not known_places:
+            return None
+
+        has_pending_query = conversation_service.get_pending_query(conversation_id) is not None
+
+        if current_intent == "train_query" or has_pending_query or self._message_has_travel_context(message):
+            return {
+                "query": rules_result.get("query"),
+                "detected_locations": rules_result.get("detected_locations", []),
+                "known_places_without_train": known_places,
+            }
+
+        return None
+    
+    def _message_has_travel_context(
+        self,
+        message: str,
+    ) -> bool:
+        normalized = message.lower().strip()
+
+        travel_markers = [
+            "tren",
+            "trens",
+            "metro",
+            "horari",
+            "horaris",
+            "vull anar",
+            "anar",
+            "sortir",
+            "arribar",
+            "des de",
+            "desde",
+            "cap a",
+            "fins a",
+            "de ",
+        ]
+
+        return any(marker in normalized for marker in travel_markers)
+
     def _try_build_query_from_pending_followup(
         self,
         message: str,
@@ -224,10 +305,18 @@ class ChatService:
         resultat = {"destination_stop_id": "manacor"}
         """
         missing_fields = conversation_service.get_missing_fields(pending_query)
-        validation = station_service.validate_station(message)
 
-        if validation.get("status") == "valid_station":
-            stop_id = validation.get("stop_id")
+        rules_result = intent_service.analyze_message_with_rules(message)
+        detected_locations = rules_result.get("detected_locations", [])
+
+        valid_stations = [
+            location
+            for location in detected_locations
+            if location.get("type") == "station"
+        ]
+
+        if valid_stations:
+            stop_id = valid_stations[0].get("id")
 
             if "destination_stop_id" in missing_fields:
                 return {
@@ -238,6 +327,11 @@ class ChatService:
                 return {
                     "origin_stop_id": stop_id,
                 }
+
+        validation = station_service.validate_station(message)
+
+        if validation.get("status") == "valid_station":
+            stop_id = validation.get("stop_id")
 
         if "time_context" in missing_fields:
             time_window = self._detect_time_window_from_followup(message)
@@ -264,6 +358,114 @@ class ChatService:
                 }
 
         return None
+    
+    def _try_build_contextual_followup_query(
+        self,
+        conversation_id: str,
+        message: str,
+        intent: str | None,
+    ) -> dict[str, Any] | None:
+        """
+        Gestiona respostes curtes que Gemini o les regles poden haver classificat
+        com a no train_query, però que tenen sentit pel context de conversa.
+
+        Casos:
+        - pending_query: "A Palma", "Manacor", "dematí"
+        - last_query: "i demà dematí?", "i avui capvespre?", "i a les 17?"
+        """
+        if intent == "train_query":
+            return None
+
+        pending_query = conversation_service.get_pending_query(conversation_id)
+
+        if pending_query:
+            pending_followup_query = self._try_build_query_from_pending_followup(
+                message=message,
+                pending_query=pending_query,
+            )
+
+            if pending_followup_query:
+                return {
+                    "query": pending_followup_query,
+                    "source": "pending_context",
+                    "reason": "Resposta curta usada per completar una consulta pendent.",
+                }
+
+        last_query = conversation_service.get_last_query(conversation_id)
+
+        if last_query:
+            temporal_followup_query = self._try_build_temporal_query_from_followup(
+                message=message,
+            )
+
+            if temporal_followup_query:
+                return {
+                    "query": temporal_followup_query,
+                    "source": "last_query_context",
+                    "reason": "Seguiment temporal aplicat a la darrera consulta completa.",
+                }
+
+        return None
+    
+    def _try_build_temporal_query_from_followup(
+        self,
+        message: str,
+    ) -> dict[str, Any] | None:
+        """
+        Detecta missatges curts que només canvien el context temporal:
+        - "i demà dematí?"
+        - "demà capvespre"
+        - "avui vespre"
+        - "a les 17"
+        """
+        date = self._detect_date_from_followup(message)
+        time_window = self._detect_time_window_from_followup(message)
+        detected_time = self._detect_simple_time_from_followup(message)
+
+        has_temporal_info = any(
+            [
+                self._has_value(date),
+                self._has_value(time_window),
+                self._has_value(detected_time),
+            ]
+        )
+
+        if not has_temporal_info:
+            return None
+
+        normalized = message.lower().strip()
+
+        query_type = "next_departure"
+        departure_after = None
+        arrival_before = None
+        time = None
+
+        if time_window:
+            query_type = "list_trains"
+
+        elif detected_time and any(word in normalized for word in ["abans", "arribar abans"]):
+            query_type = "arrival_before"
+            arrival_before = detected_time
+
+        elif detected_time and any(word in normalized for word in ["després", "despres", "a partir"]):
+            query_type = "departure_after"
+            departure_after = detected_time
+
+        elif detected_time:
+            query_type = "next_departure"
+            time = detected_time
+
+        return {
+            "query_type": query_type,
+            "origin_stop_id": None,
+            "destination_stop_id": None,
+            "date": date,
+            "time": time,
+            "time_window": time_window,
+            "departure_after": departure_after,
+            "arrival_before": arrival_before,
+            "service_id": None,
+        }
 
     def _detect_time_window_from_followup(
         self,
@@ -271,7 +473,7 @@ class ChatService:
     ) -> str | None:
         normalized = message.lower().strip()
 
-        if any(word in normalized for word in ["demati", "dematí", "mati", "matí", "mañana"]):
+        if any(word in normalized for word in ["demati", "dematí", "mati", "matí"]):
             return "morning"
 
         if any(word in normalized for word in ["migdia", "mig dia", "mediodia", "mediodía"]):
@@ -285,6 +487,40 @@ class ChatService:
 
         return None
 
+    def _detect_date_from_followup(
+        self,
+        message: str,
+    ) -> str | None:
+        normalized = message.lower().strip()
+
+        if any(word in normalized for word in ["avui", "hui"]):
+            return "today"
+
+        if any(word in normalized for word in ["demà", "dema"]):
+            return "tomorrow"
+
+        if any(word in normalized for word in ["dissabte", "sábado", "sabado"]):
+            return "saturday"
+
+        if any(word in normalized for word in ["diumenge", "domingo"]):
+            return "sunday"
+
+        if any(word in normalized for word in ["cap de setmana", "finde", "weekend"]):
+            return "weekend"
+
+        weekdays = {
+            "dilluns": "monday",
+            "dimarts": "tuesday",
+            "dimecres": "wednesday",
+            "dijous": "thursday",
+            "divendres": "friday",
+        }
+
+        for word, value in weekdays.items():
+            if word in normalized:
+                return value
+
+        return None
 
     def _detect_simple_time_from_followup(
         self,
@@ -301,7 +537,10 @@ class ChatService:
             minute = int(time_with_minutes.group(2))
             return f"{hour:02d}:{minute:02d}"
 
-        time_without_minutes = re.search(r"\b([0-2]?\d)\b", normalized)
+        time_without_minutes = re.search(
+            r"\b(?:a les|a|a las|les|las|abans de les|despres de les|després de les|a partir de les)\s+([0-2]?\d)\b",
+            normalized,
+        )
 
         if time_without_minutes:
             hour = int(time_without_minutes.group(1))
@@ -310,6 +549,85 @@ class ChatService:
                 return f"{hour:02d}:00"
 
         return None
+
+    def _merge_with_last_query_if_temporal_followup(
+        self,
+        conversation_id: str,
+        query: dict[str, Any],
+    ) -> dict[str, Any]:
+        """
+        Si l'usuari fa un seguiment temporal del tipus:
+        - "i demà dematí?"
+        - "i avui capvespre?"
+        - "i a les 17?"
+        
+        reutilitzam l'origen i la destinació de la darrera consulta completa.
+        """
+        last_query = conversation_service.get_last_query(conversation_id)
+
+        if not last_query:
+            return query
+
+        has_origin_or_destination = any(
+            [
+                self._has_value(query.get("origin_stop_id")),
+                self._has_value(query.get("destination_stop_id")),
+            ]
+        )
+
+        has_temporal_info = any(
+            [
+                self._has_value(query.get("date")),
+                self._has_value(query.get("time")),
+                self._has_value(query.get("time_window")),
+                self._has_value(query.get("departure_after")),
+                self._has_value(query.get("arrival_before")),
+            ]
+        )
+
+        if has_origin_or_destination or not has_temporal_info:
+            return query
+
+        merged_query = {
+            **last_query,
+            **{
+                key: value
+                for key, value in query.items()
+                if self._has_value(value)
+            },
+        }
+
+        if self._has_value(query.get("time_window")):
+            merged_query["query_type"] = "list_trains"
+            merged_query["time"] = None
+            merged_query["departure_after"] = None
+            merged_query["arrival_before"] = None
+
+        elif self._has_value(query.get("departure_after")):
+            merged_query["query_type"] = "departure_after"
+            merged_query["time"] = None
+            merged_query["time_window"] = None
+            merged_query["arrival_before"] = None
+
+        elif self._has_value(query.get("arrival_before")):
+            merged_query["query_type"] = "arrival_before"
+            merged_query["time"] = None
+            merged_query["time_window"] = None
+            merged_query["departure_after"] = None
+
+        elif self._has_value(query.get("time")):
+            merged_query["query_type"] = query.get("query_type") or "next_departure"
+            merged_query["time_window"] = None
+            merged_query["departure_after"] = None
+            merged_query["arrival_before"] = None
+
+        return merged_query
+
+    def _has_value(
+        self,
+        value: Any,
+    ) -> bool:
+        return value is not None and value != "" and value != []
 
     def _handle_relative_query(
         self,
@@ -387,6 +705,25 @@ class ChatService:
                 "llm_error": response_data.get("llm_error"),
             },
         )
+    
+    def _normalize_query_type_for_time_window(
+        self,
+        query: dict[str, Any],
+    ) -> dict[str, Any]:
+        """
+        Si hi ha una franja del dia, l'usuari espera una llista
+        d'opcions dins aquella franja, independentment del query_type anterior.
+        """
+        if self._has_value(query.get("time_window")):
+            return {
+                **query,
+                "query_type": "list_trains",
+                "time": None,
+                "departure_after": None,
+                "arrival_before": None,
+            }
+
+        return query
 
     def _search_results_for_query(
         self,
@@ -460,6 +797,52 @@ class ChatService:
 
         return []
 
+    def _adapt_query_for_pending_completion(
+        self,
+        conversation_id: str,
+        query: dict[str, Any],
+    ) -> dict[str, Any]:
+        """
+        Si hi ha una consulta pendent i el nou missatge només completa
+        origen o destinació, evitam que Gemini canviï query_type, time,
+        time_window o altres camps de la consulta original.
+        """
+        pending_query = conversation_service.get_pending_query(conversation_id)
+
+        if not pending_query:
+            return query
+
+        missing_fields = conversation_service.get_missing_fields(pending_query)
+
+        has_temporal_update = any(
+            [
+                self._has_value(query.get("date")),
+                self._has_value(query.get("time")),
+                self._has_value(query.get("time_window")),
+                self._has_value(query.get("departure_after")),
+                self._has_value(query.get("arrival_before")),
+            ]
+        )
+
+        completed_fields = {}
+
+        if (
+            "origin_stop_id" in missing_fields
+            and self._has_value(query.get("origin_stop_id"))
+        ):
+            completed_fields["origin_stop_id"] = query["origin_stop_id"]
+
+        if (
+            "destination_stop_id" in missing_fields
+            and self._has_value(query.get("destination_stop_id"))
+        ):
+            completed_fields["destination_stop_id"] = query["destination_stop_id"]
+
+        if completed_fields and not has_temporal_update:
+            return completed_fields
+
+        return query
+
     def _resolve_time_window(
         self,
         query: dict[str, Any],
@@ -469,7 +852,12 @@ class ChatService:
         if time_window in TIME_WINDOWS:
             return TIME_WINDOWS[time_window]
 
-        if query.get("time") and query["time"] != "now":
+        if query.get("time") == "now":
+            start = self._current_time()
+            end = minutes_to_time(time_to_minutes(start) + 120)
+            return start, end
+
+        if query.get("time"):
             start = query["time"]
             end = minutes_to_time(time_to_minutes(start) + 120)
             return start, end
@@ -505,7 +893,7 @@ class ChatService:
             return query["service_id"]
 
         mode = self._guess_mode(query)
-        date_value = query.get("date")
+        date_value = query.get("date") or "today"
 
         if mode == "metro":
             if self._date_is_sunday_or_holiday_without_metro(date_value):

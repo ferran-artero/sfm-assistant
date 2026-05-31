@@ -17,7 +17,6 @@ function App() {
   const [input, setInput] = useState("");
   const [conversationId, setConversationId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [lastDebug, setLastDebug] = useState(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -77,19 +76,9 @@ function App() {
         localStorage.setItem(STORAGE_KEY, data.conversation_id);
       }
 
-      setLastDebug({
-        intent_source: data.intent_source,
-        response_source: data.response_source,
-        debug: data.debug,
-      });
-
       const botMessage = {
         role: "bot",
         content: data.response,
-        meta: {
-          intent_source: data.intent_source,
-          response_source: data.response_source,
-        },
       };
 
       setMessages((previousMessages) => [...previousMessages, botMessage]);
@@ -102,9 +91,6 @@ function App() {
       };
 
       setMessages((previousMessages) => [...previousMessages, errorMessage]);
-      setLastDebug({
-        error: error.message,
-      });
     } finally {
       setLoading(false);
     }
@@ -115,11 +101,6 @@ function App() {
     setConversationId(null);
     setMessages(initialMessages);
     setInput("");
-    setLastDebug(null);
-  };
-
-  const handleExampleClick = (text) => {
-    setInput(text);
   };
 
   return (
@@ -139,29 +120,6 @@ function App() {
           </button>
         </header>
 
-        <section className="examples">
-          <button onClick={() => handleExampleClick("Vull anar d'Inca a Palma")}>
-            Inca → Palma
-          </button>
-          <button
-            onClick={() =>
-              handleExampleClick("Quins trens hi ha d'Inca a Palma dematí?")
-            }
-          >
-            Dematí
-          </button>
-          <button
-            onClick={() =>
-              handleExampleClick("Vull arribar a Palma abans de les 9 des d'Inca")
-            }
-          >
-            Abans de les 9
-          </button>
-          <button onClick={() => handleExampleClick("Vull anar a Vilafranca")}>
-            Poble sense tren
-          </button>
-        </section>
-
         <section className="messages" aria-live="polite">
           {messages.map((message, index) => (
             <article
@@ -172,17 +130,6 @@ function App() {
             >
               <div className="message-bubble">
                 <p>{message.content}</p>
-
-                {message.meta?.intent_source || message.meta?.response_source ? (
-                  <div className="message-meta">
-                    {message.meta.intent_source && (
-                      <span>intent: {message.meta.intent_source}</span>
-                    )}
-                    {message.meta.response_source && (
-                      <span>resposta: {message.meta.response_source}</span>
-                    )}
-                  </div>
-                ) : null}
               </div>
             </article>
           ))}
@@ -212,19 +159,8 @@ function App() {
           </button>
         </form>
 
-        <footer className="debug-panel">
-          <strong>Debug</strong>
-          <span>
-            conversa:{" "}
-            {conversationId ? conversationId.slice(0, 8) + "..." : "nova"}
-          </span>
-          {lastDebug?.intent_source && (
-            <span>intent: {lastDebug.intent_source}</span>
-          )}
-          {lastDebug?.response_source && (
-            <span>resposta: {lastDebug.response_source}</span>
-          )}
-          {lastDebug?.error && <span className="debug-error">{lastDebug.error}</span>}
+        <footer className="demo-notice">
+          Demo local no oficial. Aquesta aplicació no està vinculada a SFM i la informació pot no coincidir amb els horaris oficials.
         </footer>
       </section>
     </main>

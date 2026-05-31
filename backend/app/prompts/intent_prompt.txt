@@ -45,6 +45,14 @@ Regles d'intenció:
 - "i un més tard?" => train_query / later
 - "i un abans?" => train_query / earlier
 
+Regles de data:
+- Si l'usuari diu "avui", "ara", "aquesta tarda", "aquest vespre" o equivalent, date = "today".
+- Si l'usuari diu "demà", "mañana" o equivalent temporal, date = "tomorrow".
+- Atenció: "dematí" o "matí" NO vol dir "demà"; vol dir time_window = "morning".
+- Si l'usuari diu "dilluns", "dimarts", "dimecres", "dijous", "divendres", "dissabte" o "diumenge", usa el valor corresponent en anglès.
+- Si l'usuari diu "cap de setmana", "finde" o "weekend", date = "weekend".
+- Si l'usuari no indica cap dia, posa date = null. El backend assumirà today.
+
 Valors permesos per date:
 - today
 - tomorrow

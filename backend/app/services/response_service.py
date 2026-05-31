@@ -9,7 +9,7 @@ from app.services.hallucination_guard import hallucination_guard
 
 
 PROMPT_FILE = Path(__file__).resolve().parents[1] / "prompts" / "response_prompt.txt"
-MAX_RESULTS_TO_MENTION = 5
+MAX_RESULTS_TO_MENTION = 3
 logger = logging.getLogger("sfm.response")
 
 
@@ -40,19 +40,19 @@ class ResponseService:
 
         if intent == "thanks":
             return {
-                "response": "De res! Si necessites consultar un altre trajecte, digues-m'ho.",
+                "response": "De res! Si necessites consultar algun altre trajecte, no dubtis en dir-m'ho!",
                 "source": "template",
             }
 
         if intent == "goodbye":
             return {
-                "response": "Adeu! Bon viatge.",
+                "response": "Adéu! Bon viatge :)",
                 "source": "template",
             }
 
         if intent == "empty":
             return {
-                "response": "No he rebut cap missatge. Escriu-me una consulta sobre trens o metro.",
+                "response": "No he rebut cap missatge. Escriu-me una consulta sobre trens o metro de Mallorca.",
                 "source": "template",
             }
 
@@ -65,7 +65,7 @@ class ResponseService:
             }
 
         return {
-            "response": "No he entès bé la consulta. Pots reformular-la?",
+            "response": "No he entès bé la consulta. Podries reformular-la?",
             "source": "template",
         }
 
@@ -92,7 +92,7 @@ class ResponseService:
     ) -> dict[str, Any]:
         if not places:
             return {
-                "response": "Aquest lloc no apareix com a aturada de tren o metro dins la demo.",
+                "response": "Desafortunadament, aquest lloc encara no disposa d'aturada de tren o metro...",
                 "source": "template",
             }
 
@@ -108,8 +108,7 @@ class ResponseService:
 
         return {
             "response": (
-                f"{display_name} no apareix com a aturada de tren o metro dins la xarxa "
-                "carregada en aquesta demo."
+                f"{display_name} encara no disposa d'aturada de tren o metro."
             ),
             "source": "template",
         }
@@ -300,7 +299,7 @@ class ResponseService:
                 )
             )
 
-        return " ".join(lines)
+        return "\n".join(lines)
 
     def _format_single_result(
         self,

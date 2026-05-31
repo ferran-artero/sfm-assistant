@@ -68,12 +68,12 @@ button {
 .brand {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 25px;
 }
 
 .brand-logo {
-  width: 112px;
-  height: auto;
+  width: auto;
+  height: 62px;
   display: block;
 }
 
@@ -102,31 +102,6 @@ button {
 
 .reset-button:hover {
   background: var(--sfm-blue);
-  color: white;
-}
-
-.examples {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 16px 28px;
-  border-bottom: 1px solid var(--border);
-  background: #fbfdff;
-}
-
-.examples button {
-  border: 1px solid rgba(97, 166, 14, 0.28);
-  background: var(--sfm-green-soft);
-  color: #355d09;
-  border-radius: 999px;
-  padding: 8px 13px;
-  font-size: 0.9rem;
-  font-weight: 650;
-  transition: 0.2s ease;
-}
-
-.examples button:hover {
-  background: var(--sfm-green);
   color: white;
 }
 
@@ -179,38 +154,19 @@ button {
 .message-bubble p {
   margin: 0;
   line-height: 1.45;
-}
-
-.message-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-  font-size: 0.76rem;
-}
-
-.message-meta span {
-  border-radius: 999px;
-  padding: 4px 8px;
-  background: rgba(0, 46, 109, 0.08);
-  color: var(--sfm-blue);
-}
-
-.message.user .message-meta span {
-  background: rgba(255, 255, 255, 0.18);
-  color: white;
+  white-space: pre-line;
 }
 
 .loading-bubble {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   width: fit-content;
 }
 
 .loading-bubble span {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 999px;
   background: var(--sfm-green);
   animation: bounce 1s infinite ease-in-out;
@@ -233,7 +189,7 @@ button {
   }
 
   40% {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     opacity: 1;
   }
 }
@@ -280,30 +236,13 @@ button {
   opacity: 0.6;
 }
 
-.debug-panel {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 28px 16px;
+.demo-notice {
+  padding: 0 28px 18px;
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
   background: white;
-}
-
-.debug-panel strong {
-  color: var(--sfm-blue);
-}
-
-.debug-panel span {
-  background: var(--sfm-blue-soft);
-  border-radius: 999px;
-  padding: 5px 9px;
-}
-
-.debug-panel .debug-error {
-  background: #fff0ed;
-  color: var(--danger);
+  text-align: center;
 }
 
 @media (max-width: 720px) {
@@ -323,13 +262,13 @@ button {
   }
 
   .brand-logo {
-    width: 92px;
+    height: 48px;
+    width: auto;
   }
 
-  .examples,
   .messages,
   .chat-form,
-  .debug-panel {
+  .demo-notice {
     padding-left: 18px;
     padding-right: 18px;
   }

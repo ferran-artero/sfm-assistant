@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
+from app.services.station_service import station_service
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -232,6 +233,19 @@ class ConversationService:
             "messages_count": len(context["messages"]),
         }
 
+    def _get_stop_display_name(
+        self,
+        stop_id: str | None,
+    ) -> str | None:
+        if not stop_id:
+            return None
+
+        for station in station_service.stations:
+            if station.get("stop_id") == stop_id:
+                return station.get("display_name") or station.get("official_name") or stop_id
+
+        return stop_id
+
     def build_clarification_message(
         self,
         missing_fields: list[str],
@@ -241,8 +255,12 @@ class ConversationService:
             return None
 
         query_type = train_query.get("query_type", "next_departure")
-        origin = train_query.get("origin_stop_id")
-        destination = train_query.get("destination_stop_id")
+
+        origin_stop_id = train_query.get("origin_stop_id")
+        destination_stop_id = train_query.get("destination_stop_id")
+
+        origin = self._get_stop_display_name(origin_stop_id)
+        destination = self._get_stop_display_name(destination_stop_id)
 
         missing_origin = "origin_stop_id" in missing_fields
         missing_destination = "destination_stop_id" in missing_fields
@@ -312,11 +330,14 @@ class ConversationService:
         """
         Aplica valors per defecte quan té sentit.
 
-        Exemple:
-        - Si l'usuari només diu "Vull anar d'Inca a Palma",
-          query_type = next_departure i time = now.
+        Per defecte:
+        - si l'usuari no indica cap dia, assumim today
+        - si demana la pròxima sortida i no indica hora, assumim now
         """
         query_type = train_query.get("query_type")
+
+        if not has_value(train_query.get("date")):
+            train_query["date"] = "today"
 
         if query_type == "next_departure":
             if not has_value(train_query.get("time")):
