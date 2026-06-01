@@ -10,6 +10,7 @@ ENV_FILE = BASE_DIR / ".env"
 class Settings(BaseSettings):
     app_name: str = "SFM Assistant"
     environment: str = "development"
+    frontend_url: str = "http://localhost:5173"
 
     llm_provider: str = "gemini"
     gemini_api_key: str | None = None
