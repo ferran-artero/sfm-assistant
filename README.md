@@ -6,6 +6,15 @@ SFM Assistant is a full-stack web application that combines a React frontend, a 
 
 > This is an educational and local demo project. It is not affiliated with Serveis Ferroviaris de Mallorca (SFM), and it does not use official real-time data.
 
+## Live Demo
+
+You can try the deployed demo here:
+
+https://sfm-assistant.vercel.app/
+
+> Note: the backend runs on a free Render instance. If the app has been inactive for a while, the first request may take some time while the backend wakes up.
+
+
 ## Demo Preview
 
 <p align="center">

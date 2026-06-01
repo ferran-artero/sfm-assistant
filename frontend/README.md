@@ -4,7 +4,21 @@ React frontend for SFM Assistant, a conversational demo application for checking
 
 The frontend provides a clean chat interface where users can ask schedule questions in Catalan. It communicates with the FastAPI backend through the `POST /chat` endpoint and displays the assistant response in a simple, user-friendly layout.
 
-> This frontend is part of an educational local demo. It is not affiliated with Serveis Ferroviaris de Mallorca (SFM), and the information shown may not match official real-time schedules.
+> This frontend is part of an educational demo. It is not affiliated with Serveis Ferroviaris de Mallorca (SFM), and the information shown may not match official real-time schedules.
+
+---
+
+## Live Demo
+
+You can try the deployed demo here:
+
+```text
+https://sfm-assistant.vercel.app/
+```
+
+> Note: the backend runs on a free Render instance. If the app has been inactive for a while, the first request may take some time while the backend wakes up.
+
+---
 
 ## Demo Preview
 
@@ -23,15 +37,17 @@ The frontend provides a clean chat interface where users can ask schedule questi
 * [How It Works](#how-it-works)
 * [Main Files](#main-files)
 * [Connection with the Backend](#connection-with-the-backend)
+* [Environment Variables](#environment-variables)
 * [Conversation State](#conversation-state)
 * [User Interface](#user-interface)
 * [Styling](#styling)
 * [Responsive Design](#responsive-design)
 * [Installation](#installation)
-* [Running the Frontend](#running-the-frontend)
+* [Running the Frontend Locally](#running-the-frontend-locally)
 * [Available Scripts](#available-scripts)
 * [Testing the Interface](#testing-the-interface)
 * [Build for Production](#build-for-production)
+* [Deployment](#deployment)
 * [Common Issues](#common-issues)
 * [Known Limitations](#known-limitations)
 * [Future Improvements](#future-improvements)
@@ -64,7 +80,11 @@ Vull arribar a Palma abans de les 9 des d'Inca
 Vull anar a Vilafranca
 ```
 
-The frontend does not interpret transport data by itself. It only manages the interface, sends requests, keeps the `conversation_id` and displays the backend response.
+```text
+I demà dematí?
+```
+
+The frontend does not interpret transport data by itself. It only manages the interface, sends requests, stores the `conversation_id` and displays the backend response.
 
 ---
 
@@ -74,6 +94,7 @@ The frontend does not interpret transport data by itself. It only manages the in
 * User and assistant message bubbles.
 * Catalan-first user experience.
 * Connection with the FastAPI backend.
+* Public deployment on Vercel.
 * Persistent `conversation_id` using `localStorage`.
 * Conversation reset button.
 * Loading animation while the backend responds.
@@ -81,7 +102,7 @@ The frontend does not interpret transport data by itself. It only manages the in
 * SFM-inspired visual identity.
 * Non-official local demo notice.
 * Responsive layout for smaller screens.
-* Hidden technical metadata in the user-facing interface.
+* Technical metadata hidden from the user-facing interface.
 
 ---
 
@@ -93,6 +114,7 @@ The frontend does not interpret transport data by itself. It only manages the in
 * CSS
 * Fetch API
 * LocalStorage
+* Vercel
 
 ---
 
@@ -109,6 +131,7 @@ frontend/
 │   ├── App.css
 │   └── main.jsx
 │
+├── .env.example
 ├── package.json
 ├── vite.config.js
 └── README.md
@@ -143,6 +166,7 @@ The backend is responsible for:
 * maintaining conversational context
 * searching schedules
 * generating the final response
+* preventing unsafe or hallucinated responses
 
 The frontend is responsible for:
 
@@ -170,6 +194,7 @@ Responsibilities:
 * Reset the conversation.
 * Display loading state.
 * Display connection errors.
+* Read the backend URL from `VITE_API_URL` when available.
 
 ---
 
@@ -204,19 +229,29 @@ It renders the main `App` component into the DOM.
 
 SFM logo used in the application header.
 
-The project uses the logo for visual context in a local educational demo. The application clearly states that it is not an official SFM product.
+The project uses the logo for visual context in an educational demo. The application clearly states that it is not an official SFM product.
 
 ---
 
 ## Connection with the Backend
 
-The frontend sends messages to the backend endpoint:
+The frontend sends messages to the backend endpoint configured through the environment variable:
+
+```env
+VITE_API_URL
+```
+
+In production, this points to the deployed Render backend:
+
+```text
+https://sfm-assistant-o2st.onrender.com/chat
+```
+
+In local development, the frontend can use the local backend:
 
 ```text
 http://127.0.0.1:8000/chat
 ```
-
-This is currently defined in `src/App.jsx` as a local development URL.
 
 A typical request looks like this:
 
@@ -254,6 +289,40 @@ A typical backend response looks like this:
 The frontend displays only the user-facing `response`.
 
 Technical metadata such as `intent_source`, `response_source` and `debug` may still be returned by the backend, but it is not shown in the clean user interface.
+
+---
+
+## Environment Variables
+
+The frontend uses Vite environment variables.
+
+Create a local environment file if needed:
+
+```text
+frontend/.env.local
+```
+
+Example:
+
+```env
+VITE_API_URL=http://127.0.0.1:8000/chat
+```
+
+For production on Vercel:
+
+```env
+VITE_API_URL=https://sfm-assistant-o2st.onrender.com/chat
+```
+
+The project also includes:
+
+```text
+frontend/.env.example
+```
+
+This file documents the expected variables and can be safely committed to GitHub.
+
+Do not commit `.env.local` or any file containing secrets.
 
 ---
 
@@ -353,6 +422,7 @@ Common causes:
 
 * backend is not running
 * backend is running on a different port
+* Render free instance is waking up
 * CORS configuration issue
 * `/chat` endpoint returned an error
 * network error
@@ -425,7 +495,7 @@ npm install
 
 ---
 
-## Running the Frontend
+## Running the Frontend Locally
 
 Start the development server:
 
@@ -627,6 +697,26 @@ The backend reuses the previous route and changes only the date and time window.
 
 ---
 
+### Relative follow-up
+
+First:
+
+```text
+Vull anar d'Inca a Palma
+```
+
+Then:
+
+```text
+I un més tard?
+```
+
+Expected behavior:
+
+The backend reuses the previous route and returns a later option.
+
+---
+
 ### Out-of-domain query
 
 ```text
@@ -661,27 +751,35 @@ The generated files can be deployed to static hosting platforms such as:
 * Cloudflare Pages
 * a custom static server
 
-The deployed frontend must point to the correct backend URL.
+The deployed frontend must point to the correct backend URL through `VITE_API_URL`.
 
 ---
 
-## Configuration Notes
+## Deployment
 
-At the moment, the backend API URL is defined directly in `App.jsx`.
+The frontend is deployed on Vercel:
 
-For a more scalable setup, a future improvement would be to use a Vite environment variable:
+```text
+https://sfm-assistant.vercel.app/
+```
+
+Production configuration:
 
 ```env
-VITE_API_URL=http://127.0.0.1:8000/chat
+VITE_API_URL=https://sfm-assistant-o2st.onrender.com/chat
 ```
 
-Then use it in React:
+Deployment settings on Vercel:
 
-```js
-const API_URL = import.meta.env.VITE_API_URL;
+```text
+Framework Preset: Vite
+Root Directory: frontend
+Build Command: npm run build
+Output Directory: dist
+Install Command: npm install
 ```
 
-This would make it easier to switch between local development and production deployments.
+After changing environment variables in Vercel, the project must be redeployed because Vite injects `VITE_` variables at build time.
 
 ---
 
@@ -705,17 +803,29 @@ npm run dev
 
 ## Frontend cannot connect to backend
 
-Check that the backend is running:
+Check that the backend is running locally:
 
 ```text
 http://127.0.0.1:8000/health
 ```
 
-Also check that the frontend API URL points to:
+For the deployed version, check the Render backend health endpoint:
 
 ```text
-http://127.0.0.1:8000/chat
+https://sfm-assistant-o2st.onrender.com/health
 ```
+
+Also check that `VITE_API_URL` points to the correct `/chat` endpoint.
+
+---
+
+## First request is slow in production
+
+The backend runs on a free Render instance.
+
+If the service has been inactive for a while, the first request may take longer because the backend needs to wake up.
+
+This is expected behavior for the free hosting tier.
 
 ---
 
@@ -730,7 +840,19 @@ http://localhost:5173
 http://127.0.0.1:5173
 ```
 
-If the frontend runs on a different port or domain, the backend CORS configuration must be updated.
+In production, the backend must allow:
+
+```text
+https://sfm-assistant.vercel.app
+```
+
+The production frontend URL should be configured in the backend environment variable:
+
+```env
+FRONTEND_URL=https://sfm-assistant.vercel.app
+```
+
+If the frontend runs on a different domain, the backend CORS configuration must be updated.
 
 ---
 
@@ -760,7 +882,7 @@ They usually mean that:
 * the hallucination guard rejected the generated response
 * the backend intentionally used a safe template
 
-Check the backend terminal or debug endpoints for more details.
+Check the backend logs or debug endpoints for more details.
 
 ---
 
@@ -772,11 +894,10 @@ Current frontend limitations:
 * No persistent chat history.
 * Only the `conversation_id` is stored locally.
 * Reloading the page keeps the backend context ID but does not restore old visible messages.
-* Backend URL is currently hardcoded.
 * No frontend test suite yet.
-* No separate production configuration yet.
-* No deployment-specific environment setup yet.
 * No advanced result cards or timetable view yet.
+* No offline mode.
+* The deployed backend may have cold starts because it runs on a free hosting tier.
 
 ---
 
@@ -784,8 +905,6 @@ Current frontend limitations:
 
 Potential improvements:
 
-* Move backend URL to `VITE_API_URL`.
-* Add production and development environment files.
 * Store visible chat history in `localStorage`.
 * Add a clear “new chat” confirmation.
 * Add result cards for train options.
@@ -793,10 +912,11 @@ Potential improvements:
 * Add better accessibility labels.
 * Add keyboard shortcuts.
 * Add automated tests with Vitest and React Testing Library.
-* Add deployment documentation.
+* Add deployment-specific documentation for custom domains.
 * Add dark mode.
 * Add a compact mobile-first layout variant.
-* Add optional debug mode controlled by environment variable.
+* Add optional debug mode controlled by an environment variable.
+* Add a visual warning when the backend is waking up.
 
 ---
 

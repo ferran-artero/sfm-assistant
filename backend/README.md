@@ -29,6 +29,7 @@ Gemini is used only as a language layer. It does not directly search schedules o
 * [Installation](#installation)
 * [Environment Variables](#environment-variables)
 * [Running the Backend](#running-the-backend)
+* [Deployment](#deployment)
 * [Testing the API](#testing-the-api)
 * [Debugging](#debugging)
 * [Known Limitations](#known-limitations)
@@ -1195,6 +1196,7 @@ Example `.env`:
 ```env
 APP_NAME=SFM Assistant
 ENVIRONMENT=development
+FRONTEND_URL=http://localhost:5173
 
 LLM_PROVIDER=gemini
 GEMINI_API_KEY=your_gemini_api_key_here
@@ -1203,6 +1205,20 @@ GEMINI_MODEL=gemini-3.1-flash-lite
 RESPONSE_LANGUAGE=ca
 USE_SAMPLE_DATA=true
 DEBUG=true
+```
+
+`FRONTEND_URL` is used by the backend CORS configuration to allow requests from the frontend.
+
+In local development:
+
+```env
+FRONTEND_URL=http://localhost:5173
+```
+
+In prodcution:
+
+```env
+FRONTEND_URL=https://sfm-assistant.vercel.app
 ```
 
 Important:
@@ -1238,6 +1254,76 @@ Health check:
 ```text
 http://127.0.0.1:8000/health
 ```
+
+---
+
+## Deployment
+
+The backend is deployed on Render:
+
+```text
+https://sfm-assistant-o2st.onrender.com
+```
+
+Health check:
+
+```text
+https://sfm-assistant-o2st.onrender.com/health
+```
+
+The root path `/` is not used by the API. A `404 Not Found` response on `/` is expected. Use `/health` to check whether the backend is running.
+
+### Render Configuration
+
+Render service type:
+
+```text
+Web Service
+```
+
+Root directory:
+
+```text
+backend
+```
+
+Build command:
+
+```bash
+pip install -r requirements.txt
+```
+
+Start command:
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+### Production Environment Variables
+
+```env
+APP_NAME=SFM Assistant
+ENVIRONMENT=production
+FRONTEND_URL=https://sfm-assistant.vercel.app
+
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-3.1-flash-lite
+
+RESPONSE_LANGUAGE=ca
+USE_SAMPLE_DATA=true
+DEBUG=false
+```
+
+The production frontend is deployed on Vercel and communicates with this backend through:
+
+```text
+POST https://sfm-assistant-o2st.onrender.com/chat
+```
+
+### Free Tier Note
+
+The backend currently runs on a free Render instance. If the service has been inactive for a while, the first request may take longer because the instance needs to wake up.
 
 ---
 
@@ -1436,6 +1522,20 @@ http://127.0.0.1:8000/health
 
 Also check that CORS allows the frontend origin.
 
+For the deployed backend, check:
+
+```text
+https://sfm-assistant-o2st.onrender.com/health
+```
+
+If the frontend works locally but fails in production, check that the Render environment variable is configured correctly:
+
+```env
+FRONTEND_URL=https://sfm-assistant.vercel.app
+```
+
+The value must be the frontend origin only. It should not include `/chat` or a trailing slash.
+
 ---
 
 ## Known Limitations
@@ -1455,6 +1555,7 @@ Current limitations:
 * Debug endpoints are exposed in development.
 * Gemini may fail because of quota, latency or invalid responses.
 * No automated test suite yet.
+* The deployed backend runs on a free Render instance and may have cold starts after inactivity.
 
 ---
 
@@ -1525,6 +1626,6 @@ All transport logic belongs to the backend.
 
 ## Disclaimer
 
-This backend is part of an independent educational demo. It is not affiliated with, endorsed by or officially connected to Serveis Ferroviaris de Mallorca.
+This backend is part of an educational demo deployed on Render. It is not affiliated with Serveis Ferroviaris de Mallorca (SFM), and it does not use official real-time data.
 
 The information returned by the assistant depends on local demo data and may not match the current official service. For official and up-to-date transport information, users should always consult the official transport provider.
